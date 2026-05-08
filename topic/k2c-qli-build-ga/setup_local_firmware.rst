@@ -43,7 +43,7 @@ Override Linux-firmware binaries
 
     .. note::
   
-        To find the correct value to be assigned to ``SRCREV:pn-linux-firmware``, first check the version of the ``linux-firmware`` recipe under the path ``oe-core/meta/recipes-kernel/linux-firmware/``. If the file name is ``linux-firmware_20260221.bb``, find the matching SRCREV from the `linux-firmware git tags <https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/refs/tags>`__.
+        To find the correct value to be assigned to ``SRCREV:pn-linux-firmware``, first check the version of the ``linux-firmware`` recipe under the path ``oe-core/meta/recipes-kernel/linux-firmware/``. If the file name is ``linux-firmware_20260309.bb``, find the matching SRCREV from the `linux-firmware git tags <https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/refs/tags>`__.
 
         The ``SRCREV:pn-linux-firmware`` must be set as follows:
 

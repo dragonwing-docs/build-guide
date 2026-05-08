@@ -26,7 +26,7 @@ The following table describes the Qualcomm Yocto layers and release tags:
    * - See :ref:`Mapping access levels to firmware distributions <build_mapping_access_levels>`
      - NA
      - firmware release tag
-     - r2.0_00005.0
+     - r2.0_00006.0
 
 The following tables describe the firmware distributions that you can download. For more information about the Yocto layers, see `Qualcomm Linux metadata layers <https://docs.qualcomm.com/bundle/publicresource/topics/80-80022-27/qualcomm_linux_metadata_layers.html>`__.
 
