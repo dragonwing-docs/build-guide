@@ -101,7 +101,7 @@ The following ``git clone`` command downloads the selected firmware components i
       mkdir -p <FIRMWARE_ROOT>
       cd <FIRMWARE_ROOT>
       git clone -b <firmware release tag> --depth 1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem.git
-      # Example, <firmware release tag> is r2.0_00002.0
+      # Example, <firmware release tag> is r2.0_00006.0
 
 The ``git clone`` command clones the content into the ``<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nm`` directory. For the latest ``<firmware release tag>``, see the section *Build-critical release tags* in the `Release Notes <https://docs.qualcomm.com/doc/80-80022-300/>`__.
 
@@ -1407,7 +1407,7 @@ The BSP image build has software components to support the Qualcomm device and s
 6. Flash the generated build using :doc:`Flash software images <flash_images>`.
 
 .. note::
-   For repo manifest based builds, see :ref:`Alternative build instructions using Manifest <howto_build>`.
+   For repo manifest based builds, see :ref:`Alternative build instructions using manifest <howto_build>`.
 
 Next steps
 -----------
