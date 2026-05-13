@@ -1,0 +1,212 @@
+---
+title: "Build with QSC CLI"
+---
+
+<Note>
+  **Note**
+
+  QSC CLI is currently not supported on ARM based machines.
+</Note>
+
+Configure, download, compile, and flash Qualcomm Linux using QSC CLI.
+
+## **Host computer requirements**
+
+- Configuration
+  - x86 machine
+  - Quad-core CPU, for example, Intel i7-2600 at 3.4 GHz (equivalent or better)
+  - 300 GB free disk space (swap partition \> 32 GB)
+  - 16 GB RAM
+  - Ubuntu 22.04
+- Permissions
+  - A `sudo` permission is required to run a few commands
+
+## **Install QSC CLI**
+
+To register your Qualcomm email ID, go to [Qualcomm support page](https://www.qualcomm.com/support/working-with-qualcomm).
+
+1. Install curl (if not installed already):
+   ```text
+   sudo apt install curl
+   ```
+2. Download the Debian package for `qsc-cli`:
+   ```text
+   cd <workspace_path>
+   # For x86
+   curl -L https://softwarecenter.qualcomm.com/api/download/software/tools/Qualcomm_Software_Center/Linux/Debian/latest.deb -o qsc_installer.deb
+   # For ARM64
+   curl -L https://softwarecenter.qualcomm.com/api/download/software/tools/Qualcomm_Software_Center/Linux/ARM64/Debian/latest.deb -o qsc_installer.deb
+   ```
+3. Install the `qsc-cli` Debian package:
+   ```text
+   sudo apt update
+   sudo apt install ./qsc_installer.deb
+   ```
+4. Sign in to `qsc-cli` using your registered email ID:
+   ```text
+   qsc-cli login -u <username>
+   ```
+
+For more information about `qsc-cli`, see [How to Sync](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#howto-sync).
+
+## **Download the software**
+
+Download a software release by specifying the absolute workspace path, product ID, distribution, and release ID:
+
+<Note>
+  **Note**
+
+  If you are downloading more than one distribution, create a new workspace for each distribution that you download.
+</Note>
+
+```text
+qsc-cli chip-software download --workspace-path '<Base_Workspace_Path>' --product '<Product_ID>' --distribution '<Distribution>' --release '<Release_ID>'
+# Example, qsc-cli chip-software download --workspace-path '/local/mnt/workspace/sample_workspace' --product 'QCS9100.LE.2.0' --distribution 'Qualcomm_Linux.SPF.2.0|TEST|DEVICE|PUBLIC' --release 'r00004.1'
+```
+
+<Note>
+  **Note**
+
+  - For the Product\_ID, Distribution, and Release\_ID values, see the table _QSC-CLI Input Parameters_ in the [Release Notes](https://docs.qualcomm.com/doc/80-80021-300/).
+  - For more information about the Yocto layers, see [Qualcomm Linux metadata layers](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-27/qualcomm_linux_metadata_layers.html).
+</Note>
+
+## **Build the default configuration**
+
+### **Compile**
+
+For information on the default configurations, see the table _Default values of Machine parameters for QSC CLI_ in the [Release Notes](https://docs.qualcomm.com/doc/80-80021-300/).
+
+When the download is complete, start the compilation process. Depending on the size of the software and the host computer configuration, the compilation process can take a few hours.
+
+```text
+qsc-cli chip-software compile --workspace-path '<Base_Workspace_Path>'
+
+# Example, qsc-cli chip-software compile --workspace-path '/local/mnt/workspace/sample_workspace'
+```
+
+This process builds the necessary Qualcomm firmware and completes the Qualcomm Linux build.
+
+<Note>
+  **Note**
+
+  If you get a BitBake fetcher error, try [recompiling](https://docs.qualcomm.com/doc/80-80021-254/topic/build_frm_source_qsc_cli.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#recompile-qsc-cli) to resolve the issue. If the issue persists, see [BitBake Fetcher Error](https://docs.qualcomm.com/doc/80-80021-254/topic/troubleshoot_sync_build_and_flash.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#do-fetch-error-1) for a solution.
+</Note>
+
+### **Recompile**
+
+To recompile individual software images after any modifications to the software release, use your existing workspace built using QSC CLI:
+
+```text
+qsc-cli chip-software compile --image '<Software_Image_Name>' --workspace-path '<Base_Workspace_Path>'
+
+# Example, qsc-cli chip-software compile --image BOOT.MXF.1.0.c1 --workspace-path '/local/mnt/workspace/sample_workspace'
+```
+
+For information on software image names (`--image`), see the table _QSC-CLI Input Parameters_ in the [Release Notes](https://docs.qualcomm.com/doc/80-80021-300/).
+
+### **Flash**
+
+<Note>
+  **Note**
+
+  For QSC CLI to detect the connected devices and flash the software builds, install the Qualcomm Product Configuration Assistant Tool (PCAT) and Qualcomm USB Driver (QUD) on the host computer:
+
+  ```text
+  qsc-cli chip-software delete-workspace
+  qsc-cli login
+  qsc-cli tool install --name quts --activate-default-license
+  qsc-cli tool install --name qud --activate-default-license
+  qsc-cli tool install --name pcat --activate-default-license
+  ```
+</Note>
+
+The `qsc-cli --help` command lists the help options.
+
+For Ubuntu 22.04, you might see an issue while installing QUD, where you must enroll the public key on your Linux host for a successful QUD installation. For more information, see the `signReadme.txt` file in the `/opt/QTI/sign/` directory.
+
+<Note>
+  **Note**
+
+  Before you flash the software, ensure the following:
+
+  1. Device is in [Emergency Download (EDL) mode](https://docs.qualcomm.com/doc/80-80021-254/topic/flash_images.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#move-to-edl).
+  2. [Provision UFS](https://docs.qualcomm.com/doc/80-80021-254/topic/flash_images.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#provision-ufs).
+  3. [Choose CDT](https://docs.qualcomm.com/doc/80-80021-254/topic/flash_images.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#choose-cdt).
+  4. [Flash SAIL](https://docs.qualcomm.com/doc/80-80021-254/topic/flash_images.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#flash-sail).
+</Note>
+
+Flash a device:
+
+```text
+qsc-cli chip-software flash --workspace-path <Base_Workspace_Path> --buildflavor "sa2150p_emmc" --serialnumber <serial number>
+
+# Example, qsc-cli chip-software flash --workspace-path '/local/mnt/workspace/sample_workspace' --serialnumber 'be116704'
+```
+
+The `--buildflavor` argument is optional and only required for devices that have multiple flavors. To list the build flavors, run the following command on the host computer:
+
+```text
+qsc-cli chip-software flash --workspace-path <workspace path> --list-buildflavor
+```
+
+- To find the \<serial number\>, run the following command on the host computer:
+  ```text
+  pcat -devices
+  ```
+  **Sample output** 
+  ```text
+  Searching devices in Device Manager, please wait for a moment…
+  ID | DEVICE TYPE | DEVICE STATE | SERIAL NUMBER | ADB SERIAL NUMBER | DESCRIPTION
+  NA | NA          | EDL          | BE116704      | be116704          | Qualcomm USB Composite Device:QUSB_BULK_CID:042F_SN:BE116704
+  ```
+- The device reboots after the flashing procedure completes successfully. To verify the updated software version, see [Verify the Qualcomm Linux version](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-251/set_up_the_device.html#verify-the-qualcomm-linux-version).
+
+<Note>
+  **Note**
+
+  Flashing using QSC CLI is not supported on Windows Subsystem for Linux (WSL).
+</Note>
+
+## **Build your own configuration**
+
+To build your own configuration, you must compile the build with the default machine configuration and then compile the software product with your own machine and distribution configuration files.
+
+When compiling a software image, ensure that you also compile the software product. For example, if you compile `BOOT.MXF.1.0.c1`, ensure that you also compile the software product (such as `QCS9100.LE.2.0`).
+
+1. Compile the build for the default machine configuration:
+   1. [Download the software](https://docs.qualcomm.com/doc/80-80021-254/topic/build_frm_source_qsc_cli.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#qsc-cli-software-download).
+   2. [Compile the default build](https://docs.qualcomm.com/doc/80-80021-254/topic/build_frm_source_qsc_cli.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#compile-qsc-cli).
+2. Compile the software product with your own machine and distribution configuration files. For information on the supported machine configurations of the development kit, see the table _Default values of Machine parameters for QSC CLI_ in the [Release Notes](https://docs.qualcomm.com/doc/80-80021-300/).
+   1. Run the build commands for a specific configuration:
+      ```text
+      qsc-cli chip-software open-build-env --workspace-path <Base_Workspace_Path> --image <Software_Image_Name>
+      # Example, qsc-cli chip-software open-build-env --workspace-path '/local/mnt/workspace/sample_workspace' --image 'QCS9100.LE.2.0'
+      ```
+      This command opens the terminal. 
+      <Note>
+        **Note** 
+        An environment is set up to run your own build commands for a specific software image. QSC will not track the status of input workspaces in future releases, and you cannot flash these workspaces with `qsc-cli`.
+      </Note>
+   2. Update the highlighted command according to your own machine configuration and run it on the terminal: For example, to build qcom-multimedia-proprietary-image, change the value of \<distro.yml\> to `qcom-distro-prop-image.yml`.
+   3. After a successful build, check if the `rootfs.img` file exists in the build artifacts:
+      ```text
+      # meta-qcom uses qcomflash IMAGE_FSTYPE to create a single tarball
+      # containing all the relevant files to perform a full clean flash,
+      # including partition metadata, boot firmware, ESP # partition and
+      # the rootfs.
+      cd <workspace-dir>/build/tmp/deploy/images/<MACHINE>/<IMAGE>-<MACHINE>.rootfs.qcomflash/
+      ls -al rootfs.img
+      ```
+3. To flash your build, see [Flash software images](https://docs.qualcomm.com/doc/80-80021-254/topic/flash_images.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#flash-images). **Note**
+   <Note>
+     **Note**
+     - Before flashing, update the build images path to the compiled build images workspace at `<Base_Workspace_Path>/DEV/LE.QCLINUX.2.0/build/tmp/deploy/images/<MACHINE>/<IMAGE>-<MACHINE>.rootfs.qcomflash`. For example, `<Base Workspace Path>/DEV/LE.QCLINUX.2.0/build/tmp/deploy/images/iq-9075-evk/qcom-multimedia-image-iq-9075-evk.rootfs.qcomflash`.
+   </Note>
+
+## **Related topics**
+
+- [Connect to UART shell](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#connect-uart)
+- [Connect to network](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#connect-to-network)
+- [Sign in using SSH](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#use-ssh)
+- [Troubleshoot sync, build, and flash issues](https://docs.qualcomm.com/doc/80-80021-254/topic/troubleshoot_sync_build_and_flash.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#troubleshoot-sync-build-and-flash)

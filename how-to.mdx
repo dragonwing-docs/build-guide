@@ -1,0 +1,696 @@
+---
+title: "How to"
+---
+
+## **Sync**
+
+### **Set up shared sstate and downloads cache**
+
+You can use the `sstate-cache` and `downloads` directories to reuse the previously built artifacts and accelerate later builds. By default, BitBake creates these directories inside the build directory. You can configure shared `sstate-cache` and `downloads` directories to reuse the same cache across multiple workspaces.
+
+```text
+# export these variables before running the build
+export DL_DIR="/path/to/shared/downloads"
+export SSTATE_DIR="/path/to/shared/sstate"
+
+kas build meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/linux-qcom-6.18.yml:meta-qcom/ci/lock.yml
+
+# Example, kas build meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/linux-qcom-6.18.yml:meta-qcom/ci/lock.yml
+```
+
+### **Alternative methods to install Repo**
+
+- The latest Repo works with python3. If your default Python is python2, then install `python-is-python3` to make python3 as the default Python.
+  ```text
+  mkdir -p ~/bin
+  cd ~/bin
+  # If you already have a previous directory of repo_tool, you can delete it
+  rm -rf ~/bin/repo_tool
+  git clone https://android.googlesource.com/tools/repo.git -b v2.41 repo_tool
+  cd repo_tool
+  git checkout -b v2.41
+  export PATH=~/bin/repo_tool:$PATH
+  ```
+- If the earlier steps didn’t work, install Repo using the following commands:
+  ```text
+  # Install curl (if it isn't installed)
+  sudo apt install curl bc
+  # Latest Repo version works with python3
+  mkdir -p ~/bin
+  curl https://raw.githubusercontent.com/GerritCodeReview/git-repo/v2.41/repo -o ~/bin/repo && chmod +x ~/bin/repo
+  export PATH=~/bin:$PATH
+  ```
+
+### **Enable Downloads Mirror**
+
+BitBake builds can fail when upstream sources being referred to are inaccessible. It usually happens when the original source code being referred to has been moved, removed, or the server is temporarily down. Add the following to your local.conf to add Qualcomm’s download server as a MIRROR to avoid such fetcher failures.
+
+```text
+MIRRORS:append = " \
+svn://.*/.*     https://artifacts.codelinaro.org/qli-ci/downloads/main/ \
+git://.*/.*     https://artifacts.codelinaro.org/qli-ci/downloads/main/ \
+gitsm://.*/.*   https://artifacts.codelinaro.org/qli-ci/downloads/main/ \
+hg://.*/.*      https://artifacts.codelinaro.org/qli-ci/downloads/main/ \
+p4://.*/.*      https://artifacts.codelinaro.org/qli-ci/downloads/main/ \
+https?://.*/.*  https://artifacts.codelinaro.org/qli-ci/downloads/main/ \
+ftp://.*/.*     https://artifacts.codelinaro.org/qli-ci/downloads/main/ \
+npm://.*/?.*    https://artifacts.codelinaro.org/qli-ci/downloads/main/ \
+s3://.*/.*      https://artifacts.codelinaro.org/qli-ci/downloads/main/ \
+crate://.*/.*   https://artifacts.codelinaro.org/qli-ci/downloads/main/ \
+gs://.*/.*      https://artifacts.codelinaro.org/qli-ci/downloads/main/ \
+"
+```
+
+One way to add this to your BitBake configuration is to create a new kas configuration file and include this file during the build:
+
+```text
+cat << EOF > meta-qcom/ci/downloads-mirrors.yml
+header:
+ version: 14
+
+local_conf_header:
+ downloads-mirror: |
+  MIRRORS:append = " \
+  svn://.*/.*     https://artifacts.codelinaro.org/qli-ci/downloads/main/ \\
+  git://.*/.*     https://artifacts.codelinaro.org/qli-ci/downloads/main/ \\
+  gitsm://.*/.*   https://artifacts.codelinaro.org/qli-ci/downloads/main/ \\
+  hg://.*/.*      https://artifacts.codelinaro.org/qli-ci/downloads/main/ \\
+  p4://.*/.*      https://artifacts.codelinaro.org/qli-ci/downloads/main/ \\
+  https?://.*/.*  https://artifacts.codelinaro.org/qli-ci/downloads/main/ \\
+  ftp://.*/.*     https://artifacts.codelinaro.org/qli-ci/downloads/main/ \\
+  npm://.*/?.*    https://artifacts.codelinaro.org/qli-ci/downloads/main/ \\
+  s3://.*/.*      https://artifacts.codelinaro.org/qli-ci/downloads/main/ \\
+  crate://.*/.*   https://artifacts.codelinaro.org/qli-ci/downloads/main/ \\
+  gs://.*/.*      https://artifacts.codelinaro.org/qli-ci/downloads/main/ \\
+  "
+EOF
+
+kas build <kas configuration files>:meta-qcom/ci/downloads-mirror.yml
+# Example, kas build meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/linux-qcom-6.18.yml:meta-qcom/ci/lock.yml:meta-qcom/ci/downloads-mirrors.yml
+```
+
+### **How does QSC CLI work?**
+
+1. **Setup** QSC CLI installs Docker and configures git.
+2. **Sync** QSC CLI downloads the firmware sources and the Qualcomm Yocto layers, based on the input parameters.
+3. **Build** QSC CLI builds the necessary Qualcomm firmware and the Qualcomm Yocto layers.
+4. Internally, QSC CLI implements the standalone commands covered in the [Build from Source (with firmware and devtool)](https://docs.qualcomm.com/doc/80-80021-254/topic/build_addn_info.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2) and leverages the prebuilt Docker images for the respective Qualcomm style software images. For example, `LE.QCLINUX.2.0`.
+
+### **View information about QSC CLI commands**
+
+To see all the commands provided by QSC CLI, run the following commands:
+
+```text
+qsc-cli -h
+qsc-cli chip-software download -h
+```
+
+To see more details about a particular command, you can append `-h` to the command. For example:
+
+```text
+qsc-cli chip-software compile -h
+```
+
+### **Manage workspaces using QSC CLI**
+
+List the workspaces using the following command:
+
+```text
+qsc-cli chip-software list-workspace
+```
+
+To delete a workspace, run the following command:
+
+```text
+qsc-cli chip-software delete-workspace --workspace-path <workspace_path>
+
+# Example, qsc-cli chip-software delete-workspace --workspace-path '/local/mnt/workspace/Qworkspace'
+```
+
+### **Find a Yocto workspace using QSC CLI**
+
+You can install the `tree` command and run it on your workspace. The Yocto workspace is under the `LE.QCLINUX.2.0` directory. These directories stay the same for future releases.
+
+- QSC CLI workspace structure after `Qualcomm_Linux.SPF.2.0|TEST|DEVICE|PUBLIC` distribution build The following is a sample view, in which:
+  - `LE.QCLINUX.2.0` has the Yocto workspace.
+  <div className="flex flex-col items-center gap-2">
+    <img src="./media/k2c-qli-build-ga/ws_qsc_cli_2.png" alt="Figure: ws_qsc_cli_2" />
+  </div>
+- QSC CLI workspace structure after `Qualcomm_Linux.SPF.2.0|AP|Standard|OEM|NoModem` distribution build with firmware and devtool The following is a sample view, in which:
+  - `LE.QCLINUX.2.0` has the Yocto workspace.
+  - Few additional directories are for the Qualcomm firmware. While building with extras:
+    - The additional firmware is built.
+    - The output binaries from these are taken from the firmware recipes in the Qualcomm Yocto layers.
+    - For detailed sync and build instructions, see [Build from source (with firmware and devtool)](https://docs.qualcomm.com/doc/80-80021-254/topic/build_addn_info.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2).
+  <div className="flex flex-col items-center gap-2">
+    <img src="./media/k2c-qli-build-ga/ws_qsc_cli_4.png" alt="Figure: ws_qsc_cli_4" />
+  </div>
+
+## **Build**
+
+### **Build meta-qcom tip**
+
+The [build from source](https://docs.qualcomm.com/doc/80-80021-254/topic/build_from_source_github_intro.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#build-from-source-github) instructions explain how to build a milestone release tag for `meta-qcom`. The milestone release provides locked revisions for the well-tested dependent meta layers. If you wish to build `meta-qcom` with the branch tips for the dependent meta-layers, then follow these commands:
+
+<Note>
+  **Note**
+
+  Ensure that all the packages defined in the [host computer requirements](https://docs.qualcomm.com/doc/80-80021-254/topic/build_from_source_github_intro.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#host-machine-requirements-reg-unreg) are installed on your computer.
+</Note>
+
+1. Clone the `qualcomm-linux/meta-qcom` repository. This holds the kas configuration files required to build.
+   ```text
+   # cd to directory where you have 300 GB of free storage space to create your workspaces
+   mkdir <workspace-dir>
+   cd <workspace-dir>
+   git clone https://github.com/qualcomm-linux/meta-qcom -b master
+   ```
+2. Build the software image. Build targets are defined based on machine and distribution combinations.
+   ```text
+   kas build meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/linux-qcom-6.18.yml
+   # Example, kas build meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro-prop-image.yml:meta-qcom/ci/linux-qcom-6.18.yml
+   ```
+   For various `<machine>` and `<distro>` combinations, see [Release Notes](https://docs.qualcomm.com/doc/80-80021-300/).
+
+### **Creating a build for debugging**
+
+To generate a debug build, add `debug.yml` kas configuration fragment to your build command. To understand which kernel defconfig and config fragments are used when DEBUG\_BUILD is set to 1, see Kernel recipe, under [Kernel recipes](https://docs.qualcomm.com/doc/80-80020-27/topic/meta_qcom.html?product=895724676033554725&version=2.0rc1&state=preview#kernel-recipes).
+
+1. Build the software image with debug configuration.
+   ```text
+   kas build meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/linux-qcom-6.18.yml:meta-qcom/ci/debug.yml
+   # Example, kas build meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/linux-qcom-6.18.yml:meta-qcom/ci/debug.yml
+   ```
+
+### **Alternative build instructions using Manifest**
+
+Repo is a tool which can be used to download a list of git repositories from a [manifest](https://github.com/qualcomm-linux/qcom-manifest/). Use the Repo to sync the Yocto meta layers that the build requires.
+
+1. Install these packages in addition to the base system requirements to perform a repo-manifest based build:
+   ```text
+   sudo apt install repo python3-yaml
+   ```
+2. Download the Qualcomm Yocto and supporting layers:
+   ```text
+   # cd to directory where you have 300 GB of free storage space to create your workspaces
+   mkdir <workspace-dir>
+   cd <workspace-dir>
+   # Example, <manifest-release-tag> is qli-2.0-rc3.xml
+   repo init -u https://github.com/qualcomm-linux/qcom-manifest -b qcom-linux-wrynose -m <manifest-release-tag>.xml
+   repo sync
+   ```
+3. Set up the Yocto build environment:
+   ```text
+   # setup-environment provides a help section for instructions
+   # Run the script with --help to view all the supported flags
+   setup-environment --help
+   # machine and distribution flags refer to the machine and distribution configuration files present in `meta-qcom/ci` directory.
+   # setup-environment sets the environment settings, creates the build directory build, and enters the build directory.
+   source setup-environment --machine meta-qcom/ci/iq-9075-evk.yml --distro meta-qcom/ci/qcom-distro.yml --kernel meta-qcom/ci/linux-qcom-6.18.yml
+   ```
+4. Build the required software image:
+   ```text
+   bitbake <image-recipe>
+   # Example, bitbake qcom-multimedia-image
+   ```
+
+### **Set storage**
+
+The machine configurations have either UFS or EMMC storage enabled by default. UFS storage is enabled by default for QCS6490, IQ-9075 EVK, and IQ-8275 EVK. EMMC storage is enabled by default for IQ-615 EVK. To change the default storage, follow these commands:
+
+```text
+cd meta-qcom/conf/machine
+
+# check the machine configuration to figure out which storage is currently enabled
+cat <machine>.conf | grep "QCOM_PARTITION_FILES_SUBDIR"
+
+# Update QCOM_PARTITION_FILES_SUBDIR to set the correct storage
+# Example,
+# QCOM_PARTITION_FILES_SUBDIR ?= "partitions/iq-615-evk/emmc"
+# QCOM_PARTITION_FILES_SUBDIR ?= "partitions/iq-615-evk/ufs"
+```
+
+### **Increase swap space**
+
+If the build fails because of an out-of-memory (OOM) error, increase the swap space to more than 32 GB. Run the following commands to enlarge the swap area:
+
+```text
+<commands>
+```
+
+```text
+sudo su root
+swapon --show
+swapoff /swapfile
+fallocate -l 64G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+free -h
+```
+
+### **Check if the build is complete**
+
+After a successful build, check if the `rootfs.img` file exists in the build artifacts:
+
+```text
+# meta-qcom uses qcomflash IMAGE_FSTYPE to create a single tarball
+# containing all the relevant files to perform a full clean flash,
+# including partition metadata, boot firmware, ESP # partition and
+# the rootfs.
+cd <workspace-dir>/build/tmp/deploy/images/<MACHINE>/<IMAGE>-<MACHINE>.rootfs.qcomflash/
+ls -al rootfs.img
+```
+
+### **Modify recipe**
+
+Modify and compile a recipe from the same workspace:
+
+```text
+# You can use devtool to modify the source-code used in any of the recipes
+kas shell -c "devtool modify <recipe>" meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/lock.yml
+# Example, kas shell -c "devtool modify linux-qcom" meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/lock.yml
+
+# Build your recipe
+kas shell -c "bitbake <recipe>" meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/lock.yml
+# Example, kas shell -c "bitbake linux-qcom" meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/lock.yml
+```
+
+### **Generate an SDK**
+
+Set up the environment and generate SDK from the same workspace:
+
+```text
+kas shell -c "bitbake -c do_populate_sdk <image>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
+```
+
+When the SDK generation is complete, you can see the images in the `<workspace-dir>/build/tmp/deploy/sdk` directory.
+
+### **Generate an eSDK**
+
+Set up the environment and generate eSDK from the same workspace:
+
+```text
+kas shell -c "bitbake -c do_populate_sdk_ext <image>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
+```
+
+When the eSDK generation is complete, you can see the images in the `<workspace-dir>/build/tmp/deploy/sdk` directory.
+
+### **Clean build artifacts**
+
+1. Clean the build artifacts:
+   ```text
+   kas shell -c "bitbake -fc do_cleansstate <recipe>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
+   ```
+2. Rebuild the recipe after cleaning up the artifacts:
+   ```text
+   kas shell -c "bitbake <recipe>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
+   ```
+
+### **Build a standalone QDL**
+
+**Prerequisites**
+
+- The modules `make` and `gcc` must be available.
+- Install the following dependent packages:
+  ```text
+  sudo apt-get install git libxml2-dev libusb-1.0-0-dev pkg-config
+  ```
+
+**Steps to build QDL**
+
+1. Download and compile the Linux flashing tool (QDL):
+   ```text
+   mkdir <qdl_download_path>
+   git clone --branch master https://github.com/linux-msm/qdl
+   cd qdl
+   make
+   ```
+2. Flash using the generated QDL:
+   ```text
+   # Built images are under <workspace_path>/build/tmp/deploy/images/<MACHINE>/<IMAGE>-<MACHINE>.rootfs.qcomflash
+   # qdl <prog.mbn> [<program> <patch> ...]
+   cd <workspace_path>/build/tmp/deploy/images/iq-9075-evk/qcom-multimedia-image-iq-9075-evk.rootfs.qcomflash
+   # For UFS storage
+   <qdl_download_path>/qdl/qdl --storage ufs prog_firehose_ddr.elf rawprogram*.xml patch*.xml
+   # For EMMC storage
+   <qdl_download_path>/qdl/qdl --storage emmc prog_firehose_ddr.elf rawprogram0.xml patch0.xml
+   ```
+
+### **Change the Hexagon tool install path**
+
+The `HEXAGON_ROOT` environment variable must point to the path where the Hexagon tools are installed. By default, the `qsc-cli` tool installs a `HEXAGON_ROOT` variable in the `$HOME` directory. You can also choose an alternate installation directory.
+
+Use the `––path` option in `qsc-cli` command to install Hexagon tools in a directory of your choice and export the `HEXAGON_ROOT` variable to the same directory.
+
+Provide an absolute path for `<TOOLS_DIR>` in `qsc-cli` and export commands as shown in the following example:
+
+```text
+# Example
+
+mkdir -p <TOOLS_DIR>
+qsc-cli tool extract --name hexagon8.4 --required-version 8.4.07 --path <TOOLS_DIR>/8.4.07
+export HEXAGON_ROOT=<TOOLS_DIR>
+```
+
+### **Image recipes supported in the Source workflow**
+
+| **Image recipe** | **Description** |
+| :-: | :-: |
+| `qcom-minimal-image` | A minimal rootfs image that boots to shell |
+| `qcom-console-image` | Boot to shell with package group to bring in all the basic packages |
+| `qcom-multimedia-image` | Image recipe with upstream multimedia software components |
+| `qcom-multimedia-proprietary-image` | Image recipe with proprietary multimedia software components |
+
+## **Developer workflow**
+
+### **Migrate from the earlier release to the next release**
+
+The migration process depends on the development, branching, and integration workflows at your end. However, perform the following steps:
+
+1. Integrate changes for the sources that you have branched:
+   1. Skip this step if you haven’t forked any underlying source code used by Qualcomm Yocto layers and are applying only `.patch` files.
+   2. Qualcomm provides git history to all the source repositories. You can see a reference list of repositories in the [Release Notes](https://docs.qualcomm.com/doc/80-80021-300/). For the Qualcomm repositories branched and modified at your end, perform the following steps:
+      1. Compare the Qualcomm Yocto layers with your Yocto layers, and identify the repositories you must migrate.
+      2. Check the Qualcomm Yocto layer recipes and identify the SRC\_URI updates.
+      3. Clone these repositories using `git clone` and check out the appropriate branch and SHA as pointed by the SRC\_URI.
+      4. Use `git merge` or the appropriate mechanism to bring the delta to your own fork according to your need.
+      5. Update your recipes as required.
+2. Integrate the Yocto layer recipes – `git merge` the Yocto layer to pick up any changes.
+3. Build and validate your resulting workspace.
+4. Proceed with the next steps in your internal workflows.
+
+### **Build a Qualcomm Linux kernel**
+
+See [building kernel image](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-3/getting_started_chapter2.html#build-the-device-image).
+
+### **Customize Qualcomm Linux**
+
+See [User customizations](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-27/customize_qualcomm_linux.html).
+
+## **Setup**
+
+### **Connect to a UART shell**
+
+<Tabs>
+  <Tab title="QCS6490/QCS5430">
+    <div className="flex flex-col items-center gap-2">
+  <img src="./media/k2c-qli-build-ga/micro_usb_port.png" alt="micro_usb_port" />
+</div>
+  </Tab>
+  <Tab title="IQ-9075">
+    <Tabs>
+      <Tab title="IQ-9 Beta EVK">
+        <div className="flex flex-col items-center gap-2">
+  <img src="./media/k2c-qli-build-ga/uart_ridesx.png" alt="uart_ridesx" />
+</div>
+      </Tab>
+      <Tab title="IQ-9075 EVK">
+        <div className="flex flex-col items-center gap-2">
+  <img src="./media/k2c-qli-build-ga/uart_iq9075_evk.png" alt="uart_iq9075_evk" />
+</div>
+      </Tab>
+    </Tabs>
+  </Tab>
+  <Tab title="IQ-8275">
+    <Tabs>
+      <Tab title="IQ-8 Beta EVK">
+        <div className="flex flex-col items-center gap-2">
+  <img src="./media/k2c-qli-build-ga/uart_ridesx.png" alt="uart_ridesx" />
+</div>
+      </Tab>
+      <Tab title="IQ-8275 EVK">
+        <div className="flex flex-col items-center gap-2">
+  <img src="./media/k2c-qli-build-ga/uart_iq9075_evk.png" alt="uart_iq9075_evk" />
+</div>
+      </Tab>
+    </Tabs>
+  </Tab>
+</Tabs>
+
+1. Install Minicom on the Linux host:
+   ```text
+   sudo apt update
+   sudo apt install minicom
+   ```
+2. Check the USB port:
+   ```text
+   ls /dev/ttyUSB*
+   ```
+   **Sample output** `/dev/ttyUSB0`
+3. Open Minicom:
+   ```text
+   sudo minicom -s
+   ```
+4. Use the Down arrow key to select the **Serial port setup** option. Use the Up and Down arrow keys to navigate through the menu.
+
+<div className="flex flex-col items-center gap-2">
+  <img src="./media/k2c-qli-build-ga/serial_port_setup.jpg" alt="serial_port_setup" />
+</div>
+
+5. Set up the serial device configuration:
+   <Note>
+     **Note** Ensure that the letters are in uppercase.
+   </Note>
+   1. Select **A** on your keyboard to set up the serial device name such as `/dev/ttyUSB0`.
+   2. Select **Enter** to save the changes.
+   3. Select **E** on your keyboard to set the baud rate and 8N1 configuration:
+      1. Select the **E** key again if the baud rate isn’t set to **115200**.
+      2. Select the **Q** key if the configuration isn’t set to **8N1**.
+      <div className="flex flex-col items-center gap-2">
+        <img src="./media/k2c-qli-build-ga/option_Q.png" alt="option_Q" />
+      </div>
+   4. Select **Enter** to save the changes.
+   5. Select **F** on your keyboard to set the **Hardware Flow Control** to `No`.
+      <div className="flex flex-col items-center gap-2">
+        <img src="./media/k2c-qli-build-ga/serial_device_configuration.png" alt="serial_device_configuration" />
+      </div>
+   6. Select **Enter** to save the changes.
+6. Select the **Save setup as dfl** option and then select **Enter**.
+
+<div className="flex flex-col items-center gap-2">
+  <img src="./media/k2c-qli-build-ga/save_setup_as_dfl.png" alt="save_setup_as_dfl" />
+</div>
+
+7. Select **EXIT** to open the UART console and then select **Enter**.
+8. Sign in to the UART console:
+   - Login: `root`
+   - Password: `oelinux123`
+     <Note>
+       **Note** If the sign in console doesn’t display as expected, verify the USB connection. If the issue persists, disconnect and then reconnect the micro-USB.
+     </Note>
+
+<Note>
+  **Note**
+
+  If you want to run sample applications from the UART shell, remount the root file system with write permissions:
+
+  ```text
+  mount -o rw,remount /
+  ```
+</Note>
+
+### **Connect to ADB**
+
+See [Install and connect to ADB](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-251/faqs.html#install-adb).
+
+### **Connect to the network**
+
+**Set up Wi-Fi**
+
+Wi-Fi is operational in Station mode. The Wi-Fi host driver and the authentication for network management are initialized during the device boot up.
+
+1. Connect to the Wireless Access Point (Wi-Fi Router):
+   ```text
+   nmcli dev wifi connect <WiFi-SSID> password <WiFi-password>
+   ```
+   **Example**
+   ```text
+   root@iq-9075-evk:~# nmcli dev wifi connect Hydra password 1234567890
+   ```
+2. Check the connection and device status:
+   ```text
+   nmcli -p device
+   ```
+   <div className="flex flex-col items-center gap-2">
+     <img src="./media/k2c-qli-build-ga/status_of_devices.png" alt="status_of_devices" />
+   </div>
+3. Check the WLAN connection status and IP address:
+   ```text
+   ip address show wlp1s0
+   ```
+   <div className="flex flex-col items-center gap-2">
+     <img src="./media/k2c-qli-build-ga/chk_ip.png" alt="chk_ip" />
+   </div>
+4. Ensure that the connection is active by pinging any website:
+   ```text
+   ping google.com
+   ```
+
+**Switching networks**
+
+If you are already connected to a network and need to reconnect to another network, do the following:
+
+1. Disconnect from the current network:
+   ```text
+   nmcli c down Hydra
+   ```
+   Connection ‘Hydra’ successfully deactivated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/1)
+2. Check the disconnect status:
+   ```text
+   nmcli -p device
+   ```
+   <div className="flex flex-col items-center gap-2">
+     <img src="./media/k2c-qli-build-ga/status_of_devices_switch_network.png" alt="status_of_devices_switch_network" />
+   </div>
+3. Connect to a different Wi-Fi network:
+   ```text
+   nmcli dev wifi connect QualcommAP password XXXXXXXXX
+   ```
+4. Check the connection status:
+   ```text
+   nmcli -p device
+   ```
+
+**Sign in using SSH**
+
+Establish the [network connectivity](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#connect-to-network) before connecting to SSH.
+
+1. Locate the IP address of the device according to the type of network connection, using the UART console on the Linux host: For Ethernet:
+   ```text
+   ip address show eth2
+   ```
+   For Wi-Fi:
+   ```text
+   ip address show wlp1s0
+   ```
+2. Use the IP address from the Linux host to establish an SSH connection to the device:
+   ```text
+   ssh root@ip-address
+   ```
+   **Example** `ssh root@192.168.0.222`
+3. Connect to the SSH shell using the following password:
+   ```text
+   oelinux123
+   ```
+
+<Note>
+  **Note**
+
+  - Connect the remote host to the same Wi-Fi access point as the device.
+  - To create a non-root user account, see [Create a non-root user account](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-251/faqs.html#non-root-acc).
+</Note>
+
+### **Configure Ethernet with RJ45 port**
+
+Ethernet/RJ45 port is enabled as a downstream port of PCIe to USB controller (`renesas`). Ensure that the `renesas_usb_fw.mem` file is available at the `var/usbfw` directory.
+
+<Note>
+  **Note**
+
+  - If the `renesas_usb_fw.mem` firmware isn’t available at the `var/usbfw` directory, then [update USB and Ethernet controller firmware](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#update-usb-eth-controller).
+</Note>
+
+To check if the USB to Ethernet controller is enumerated, run the following command:
+
+```text
+lsusb
+```
+
+**Sample output**:
+
+```text
+Bus 002 Device 003: ID 0b95:1790 ASIX Electronics Corp. AX88179 Gigabit Ethernet
+Bus 002 Device 002: ID 05e3:0625 Genesys Logic, Inc. USB3.2 Hub
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 001 Device 002: ID 05e3:0610 Genesys Logic, Inc. Hub
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+```
+
+Connect an RJ45 cable to the device.
+
+To check the Ethernet IP address, run the following command:
+
+```text
+ip address
+```
+
+**Sample output**:
+
+<Note>
+  **Note**
+
+  10.219.0.106 is the IP address.
+</Note>
+
+```text
+enP1p4s0u1u1 Link encap:Ethernet HWaddr A6:CD:9B:FD:C1:B5
+
+inet addr:10.219.0.106  Bcast:10.219.1.255  Mask:255.255.254.0
+inet6 addr: fe80::a370:7a00:8131:5a03/64 Scope:Link
+UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+RX packets:1071 errors:0 dropped:0 overruns:0 frame:0
+TX packets:132 errors:0 dropped:0 overruns:0 carrier:0
+collisions:0 txqueuelen:1000
+RX bytes:60711 (59.2 KiB)  TX bytes:18342 (17.9 KiB)
+```
+
+### **Update USB and Ethernet controller firmware**
+
+If you face USB or Ethernet connectivity issues on the device, consider updating the firmware for the USB controller.
+
+**Prerequisites**
+
+- Upgrade the software as described in [Update the software](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-251/upgrade-rb3gen2-software.html) before updating the Renesas firmware.
+- Connect the device to the Linux host through the USB Type-C cable.
+
+<Note>
+  **Note**
+
+  The following procedure is applicable only to Ubuntu 22.04 host. If you are using a Windows or macOS host, set up an Ubuntu virtual machine by following the instructions described in the [Virtual Machine Setup Guide](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-41/getting-started.html).
+</Note>
+
+**Update the firmware**
+
+1. Register and sign in to [Renesas](https://www.renesas.com/).
+2. [Download the firmware](https://www.renesas.com/en/products/interface/usb-switches-hubs/upd720201-usb-30-host-controller#design_development).
+3. Create the `usb_fw.img` image and copy the USB firmware:
+   ```text
+   dd if=/dev/zero of=usb_fw.img bs=4k count=240
+   mkfs -t ext4 usb_fw.img
+   mkdir usb_fw
+   sudo mount -o loop usb_fw.img usb_fw/
+   sudo cp -rf renesas_usb_fw.mem usb_fw
+   sudo umount usb_fw
+   ```
+4. Start the device in Fastboot mode:
+   ```text
+   adb root
+   adb shell
+   reboot bootloader
+   ```
+5. Check if the device is in Fastboot mode:
+   ```text
+   fastboot devices
+   ```
+   7dc85f5e fastboot
+6. Flash the `usb_fw.img` image to the device:
+   ```text
+   fastboot erase usb_fw
+   fastboot flash usb_fw usb_fw.img
+   fastboot reboot
+   ```
+   c:\>fastboot erase usb\_fw\
+   Erasing ‘usb\_fw’ FAILED (remote: ‘Check device console.’)\
+   fastboot: error: Command failed
+7. Verify if the firmware is successfully updated:
+   ```text
+   dmesg
+   ```
+   ```text
+   Sample log after the firmware is successfully updated. [    6.589462] usbcore: registered new device driver onboard-usb-hub
+   [    6.653277] usb 2-1: new SuperSpeed USB device number 2 using xhci_hcd
+   [    7.013061] usb 2-1.1: new SuperSpeed USB device number 3 using xhci_hcd
+   [    7.120657] ax88179_178a 2-1.1:1.0 eth0: register ‘ax88179_178a’ at usb-0001:04:00.0-1.1, ASIX AX88179 USB 3.0 Gigabit Ethernet, 3e:9e:5e:ff:d3:fb
+   [    7.120767] usbcore: registered new interface driver ax88179_178a
+   ```
