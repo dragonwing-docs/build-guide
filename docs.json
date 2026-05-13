@@ -1,0 +1,27 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Build Guide",
+  "theme": "mint",
+  "colors": {
+    "primary": "#3253DC",
+    "light": "#5B7FFF",
+    "dark": "#1A3AB8"
+  },
+  "navigation": {
+    "groups": [
+      		{
+                "group": "Build Guide",
+                "pages": [
+                  "build-guide",
+                  "build-overview",
+                  "build-from-source",
+                  "build-from-source-with-firmware-and-devtool",
+                  "build-with-qsc-cli",
+                  "flash-software-images",
+                  "troubleshoot",
+                  "how-to"
+    		]
+          }
+        ]
+      }
+}

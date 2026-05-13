@@ -1,0 +1,1090 @@
+---
+title: "Build from source (with firmware and devtool)"
+---
+
+Use this information to build `meta-qcom` layer along with firmware sources.
+
+<Note>
+  **Note**
+
+  This information is applicable only for authorized users. To upgrade your access, go to [Qualcomm support page](https://www.qualcomm.com/support/working-with-qualcomm).
+</Note>
+
+## **Host computer requirements**
+
+- Configuration
+  - x86 machine
+  - Quad-core CPU, for example, Intel i7-2600 at 3.4 GHz (equivalent or better)
+  - 300 GB free disk space (swap partition \> 32 GB)
+  - 16 GB RAM
+  - Ubuntu 22.04
+- Tools
+  - Git 1.8.3.1 or later versions
+  - Tar 1.28 or later versions
+  - Python 3.10.2 or later versions
+  - GCC 10.1 or later versions
+  - GNU Make 4.0 or later versions
+  - Kas 4.8 or later versions
+- Permissions
+  - A `sudo` permission is required to run a few commands
+
+<Note>
+  **Note**
+
+  Code compilation on a VM is a slow process and can take a few hours. Qualcomm recommends using an Ubuntu host computer for compilation. To set up a virtual machine (VM) running Ubuntu 22.04 on Microsoft<sup>®</sup> Windows<sup>®</sup> or Apple<sup>®</sup> macOS<sup>®</sup>, see [Qualcomm Linux Virtual Machine Setup Guide](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-41/).
+</Note>
+
+## **Install QSC CLI**
+
+To register your Qualcomm email ID, go to [Qualcomm support page](https://www.qualcomm.com/support/working-with-qualcomm).
+
+1. Install curl (if not installed already):
+   ```text
+   sudo apt install curl
+   ```
+2. Download the Debian package for `qsc-cli`:
+   ```text
+   cd <workspace_path>
+   # For x86
+   curl -L https://softwarecenter.qualcomm.com/api/download/software/tools/Qualcomm_Software_Center/Linux/Debian/latest.deb -o qsc_installer.deb
+   # For ARM64
+   curl -L https://softwarecenter.qualcomm.com/api/download/software/tools/Qualcomm_Software_Center/Linux/ARM64/Debian/latest.deb -o qsc_installer.deb
+   ```
+3. Install the `qsc-cli` Debian package:
+   ```text
+   sudo apt update
+   sudo apt install ./qsc_installer.deb
+   ```
+4. Sign in to `qsc-cli` using your registered email ID:
+   ```text
+   qsc-cli login -u <username>
+   ```
+
+For more information about `qsc-cli`, see [How to Sync](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#howto-sync).
+
+## **Set up the Ubuntu host computer**
+
+Install and configure the software tools on the Ubuntu host computer.
+
+1. Install the following packages:
+   ```text
+   sudo apt update
+   sudo apt install build-essential chrpath cpio debianutils diffstat file gawk gcc git iputils-ping libacl1 locales python3 python3-git python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip wget xz-utils zstd
+   sudo apt-get install lib32stdc++6 libncurses5 checkinstall libreadline-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev curl
+   sudo apt install pipx
+   # This command must add the kas binary location to your PATH
+   # Restart your shell session after running this command for the changes to take effect
+   pipx ensurepath
+   # The kas version is expected to be 4.8 or higher
+   pipx install kas
+   ```
+2. (Optional) Download the `kas-container` script. Kas is the tool you use to sync and build Yocto meta layers. The kas package also includes the `kas-container` script, which runs kas inside a container. If you prefer building images in an isolated environment, use `kas-container` instead.
+   ```text
+   # kas-container can be run on any Linux distribution with Docker installed.
+   wget -qO kas-container https://raw.githubusercontent.com/siemens/kas/refs/tags/5.1/kas-container
+   chmod +x kas-container
+   ```
+3. Add your Qualcomm login ID with PAT to the `~/.netrc` file in your home directory:
+   ```text
+   # Sign in to qsc-cli to generate PAT
+   qsc-cli login -u <username>
+   # Run the following command to generate PAT
+   qsc-cli show-access-token
+   # This command gives output as shown in the following note
+   # The last line in this output is the token, which can be used to access
+   # Qualcomm Proprietary repositories. This token expires in two weeks.
+   ```
+   <Note>
+     **Note**
+     ```text
+     user@hostname:/local/mnt/workspace$ qsc-cli show-access-token 
+     [Info]: Starting qsc-cli version 0.0.0.9 
+     5LThNlklb55mMVLB5C2KqUGU2jCF
+     ```
+   </Note>
+4. Use your preferred text editor to edit the `~/.netrc` file and add the following entries. Create the `~/.netrc` file if it doesn’t exist.
+   ```text
+   machine chipmaster2.qti.qualcomm.com
+   login <your Qualcomm login id>
+   password <your PAT token>
+   machine qpm-git.qualcomm.com
+   login <your Qualcomm login id>
+   password <your PAT token>
+   ```
+5. Set up the locales (if not set up already):
+   ```text
+   sudo locale-gen en_US.UTF-8
+   sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+   export LC_ALL=en_US.UTF-8
+   export LANG=en_US.UTF-8
+   ```
+6. Update git configurations:
+   ```text
+   # Check if your identity is configured in .gitconfig
+   git config --get user.email
+   git config --get user.name
+   # Run the following commands if you don't have your account identity set in .gitconfig
+   git config --global user.email <Your email ID>
+   git config --global user.name <"Your Name">
+   # Add the following UI color option for output of console (optional)
+   git config --global color.ui auto
+   # Add the following git configurations to fetch large size repositories and to avoid unreliable connections
+   git config --global http.postBuffer 1048576000
+   git config --global http.maxRequestBuffer 1048576000
+   git config --global http.lowSpeedLimit 0
+   git config --global http.lowSpeedTime 999999
+   # Add the following git configurations to follow remote redirects from http-alternates files or alternates
+   git config --global http.https://chipmaster2.qti.qualcomm.com.followRedirects true
+   git config --global http.https://qpm-git.qualcomm.com.followRedirects true
+   ```
+7. Set up Python 3.10.2:
+   <Note>
+     **Note** Skip the following instructions if you already have Python 3.10.2 or later versions.
+   </Note>
+   ```text
+   python --version
+   # Download it in a directory of your choice
+   wget https://www.python.org/ftp/python/3.10.2/Python-3.10.2.tgz
+   tar -xvf Python-3.10.2.tgz
+   cd Python-3.10.2
+   # Use sudo if you need to access /opt
+   ./configure --prefix=/opt/python3 --enable-optimizations
+   make
+   make install
+   ln -s /opt/python3/bin/python3  /opt/python3/bin/python
+   export PATH=/opt/python3/bin:$PATH
+   export PYTHONPATH=/opt/python3/lib:$PYTHONPATH
+   ```
+
+<Note>
+  **Note**
+
+  The [kas](https://kas.readthedocs.io/en/latest/) tool is used by Qualcomm Linux to sync the meta layers, configure the environment, and execute the BitBake commands.
+</Note>
+
+## **Build with firmware sources**
+
+### **Sync firmware**
+
+Commands in the following sections are based on the binary and source for firmware images without modem and GPS (see the command in [Mapping firmware distributions to git repositories](https://docs.qualcomm.com/doc/80-80021-254/topic/build_addn_info.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#mapping-firmware-table)). Hence, `qualcomm-linux-spf-2-0_ap_standard_oem_nomodem` is used. If you use any other distribution, then update the directory accordingly.
+
+The following table describes the Qualcomm Yocto layers and release tags:
+
+Qualcomm Yocto layers and manifest tags
+
+| **Access level** | **Yocto layer** | **Release tag** | **Example** |
+| :-: | :-: | :-: | :-: |
+| Public developers (unregistered) | `meta-qcom` | meta-qcom-releases tag | qli-2.0-rc3 |
+| See [Mapping access levels to firmware distributions](https://docs.qualcomm.com/doc/80-80021-254/topic/build_addn_info.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#build-mapping-access-levels) | NA | firmware release tag | r2.0\_00006.0 |
+
+The following tables describe the firmware distributions that you can download. For more information about the Yocto layers, see [Qualcomm Linux metadata layers](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-27/qualcomm_linux_metadata_layers.html).
+
+Mapping access levels to firmware distributions
+
+|  |  |  |  | **Access level** | **Distribution** | **Yocto layers** |
+| --- | --- | --- | --- | --- | --- | --- |
+| Licensed developers with authorized access | BSP build: High-level OS and firmware source (GPS only)<br />\`Qualcomm\_Linux.SPF.2.0 | AP | Standard | OEM | NoModem\` | `meta-qcom`<br />`meta-qcom-distro` |
+| Licensed developers (contact Qualcomm for access) | BSP build: High-level OS and firmware (GPS only) source<br />\`Qualcomm\_Linux.SPF.2.0 | AP | Standard | OEM | \` | `meta-qcom`<br />`meta-qcom-distro` |
+| Licensed developers (contact Qualcomm for access) | BSP build: High-level OS and firmware (GPS and modem) source<br />\`Qualcomm\_Linux.SPF.2.0 | AMSS | Standard | OEM | \` | `meta-qcom`<br />`meta-qcom-distro` |
+
+The following table maps the firmware distributions to git repositories:
+
+Mapping firmware distributions to git repositories
+
+| **Firmware distribution** | **Git command** | **Directory into which firmware gets synced on git clone** |
+| :-: | :-: | :-: |
+| Qualcomm\_Linux.SPF.2.0\|AP\|Standard\|OEM\|NoModem | `git clone -b <firmware release tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem.git` | `qualcomm-linux-spf-2-0_ap_standard_oem_nomodem` |
+| Qualcomm\_Linux.SPF.2.0\|AP\|Standard\|OEM\| | `git clone -b <firmware release tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_ap_standard_oem.git` | `qualcomm-linux-spf-2-0_ap_standard_oem` |
+| Qualcomm\_Linux.SPF.2.0\|AMSS\|Standard\|OEM\| | `git clone -b <firmware release tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_amss_standard_oem.git` | `qualcomm-linux-spf-2-0_amss_standard_oem` |
+
+The **Git command** column (in the [Mapping firmware distributions to git repositories](https://docs.qualcomm.com/doc/80-80021-254/topic/build_addn_info.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#mapping-firmware-table) table) provides information about the git repositories that contain the firmware sources. Qualcomm servers host these repositories. Clone the appropriate repositories based on your access profile and use case.
+
+The following `git clone` command downloads the selected firmware components in source, except the modem:
+
+```text
+mkdir -p <FIRMWARE_ROOT>
+cd <FIRMWARE_ROOT>
+git clone -b <firmware release tag> --depth 1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem.git
+# Example, <firmware release tag> is r2.0_00002.0
+```
+
+The `git clone` command clones the content into the `<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nm` directory. For the latest `<firmware release tag>`, see the section _Build-critical release tags_ in the [Release Notes](https://docs.qualcomm.com/doc/80-80021-300/).
+
+### **Build firmware**
+
+<Tabs>
+  <Tab title="QCM6490/QCS5430">
+    **Prerequisites**
+
+    - Ensure that the working shell is `bash`.
+      ```text
+      echo $0
+      ```
+      The expected output of the command should be `bash`. If not, enter the bash shell:
+      ```text
+      bash
+      ```
+    - Install the libffi6 package using the following commands. This is required for the QAIC compiler, which generates the header and the source files from the IDL files:
+      ```text
+      curl -LO http://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi6_3.2.1-8_amd64.deb
+      sudo dpkg -i libffi6_3.2.1-8_amd64.deb
+      ```
+    - Install LLVM for AOP, Qualcomm<sup>®</sup> Trusted Execution Environment (TEE), and boot compilation:
+      ```text
+      cd <FIRMWARE_ROOT>
+      mkdir llvm
+      # Sign in to qsc-cli and activate the license
+      qsc-cli login
+      qsc-cli tool activate-license --name sdllvm_arm
+      # LLVM requirement for boot compilation is 14.0.4
+      qsc-cli tool install --name sdllvm_arm --required-version 14.0.4 --path <FIRMWARE_ROOT>/llvm/14.0.4
+      chmod -R 777 <FIRMWARE_ROOT>/llvm/14.0.4
+      # LLVM requirement for the Qualcomm TEE compilation is 16.0.7
+      qsc-cli tool install --name sdllvm_arm --required-version 16.0.7 --path <FIRMWARE_ROOT>/llvm/16.0.7
+      chmod -R 777 <FIRMWARE_ROOT>/llvm/16.0.7
+      ```
+    - Export the `SECTOOLS` variable and compile the firmware builds (`<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem` is the top-level directory):
+      ```text
+      export SECTOOLS=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCM6490.LE.2.0/common/sectoolsv2/ext/Linux/sectools
+      export SECTOOLS_DIR=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCM6490.LE.2.0/common/sectoolsv2/ext/Linux
+      ```
+    - Install and set up Qualcomm<sup>®</sup> Hexagon<sup>™</sup> Processor. Set the environment variable HEXAGON\_ROOT to the path where the Hexagon SDK is installed. To change the install path when using `qsc-cli`, see [Change the Hexagon tool install path](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#change-hex-tool-install-path).
+      ```text
+      qsc-cli tool extract --name hexagon8.4 --required-version 8.4.07
+      qsc-cli tool extract --name hexagon8.4 --required-version 8.4.10
+      export HEXAGON_ROOT=$HOME/Qualcomm/HEXAGON_Tools
+      echo $HEXAGON_ROOT
+      ```
+
+    **Build aDSP**
+
+    **Tools required**
+
+    - Compiler version: Hexagon 8.4.07
+    - Python version: Python 3.10.2
+    - libffi6 package
+
+    **Build steps**
+
+    1. Nanopb integration (one-time setup):
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/ADSP.HT.5.5.c8/adsp_proc/qsh_api
+       curl https://jpa.kapsi.fi/nanopb/download/nanopb-0.3.9.5-linux-x86.tar.gz -o nanopb-0.3.9.5-linux-x86.tar.gz
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/ADSP.HT.5.5.c8/adsp_proc/
+       python qsh_api/build/config_nanopb_dependency.py -f nanopb-0.3.9.5-linux-x86
+       ```
+    2. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/ADSP.HT.5.5.c8/adsp_proc/build/ms
+       ```
+    3. Clean the build:
+       ```text
+       python ./build_variant.py kodiak.adsp.prod --clean
+       ```
+    4. Build the image:
+       ```text
+       python ./build_variant.py kodiak.adsp.prod
+       ```
+
+    **Build Boot**
+
+    **Tools required**
+
+    - Compiler version: LLVM version must be updated to 14.0.4
+      ```text
+      export LLVM=<FIRMWARE_ROOT>/llvm/14.0.4/
+      ```
+    - Python version: Python 3.10
+    - libffi6 package
+
+    **Build steps**
+
+    1. Install the device tree compiler:
+       ```text
+       sudo apt-get install device-tree-compiler
+       export DTC=/usr/bin
+       ```
+    2. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/BOOT.MXF.1.0.c1/
+       ```
+    3. Install the dependencies:
+       ```text
+       python -m pip install -r boot_images/boot_tools/dtschema_tools/oss/requirements.txt
+       pip install json-schema-for-humans
+       ```
+    4. Clean the build:
+       ```text
+       python -u boot_images/boot_tools/buildex.py -t kodiak,QcomToolsPkg -v LAA -r RELEASE --build_flags=cleanall
+       ```
+    5. Build the image:
+       ```text
+       python -u boot_images/boot_tools/buildex.py -t kodiak,QcomToolsPkg -v LAA -r RELEASE
+       ```
+       <Note>
+         **Note** For debug variant builds, replace `RELEASE` with `DEBUG`.
+       </Note>
+
+    **Build Qualcomm TEE firmware**
+
+    **Tools required**
+
+    - Compiler version: LLVM 16.0.7
+    - Python version: Python 3.10
+
+    **Build steps**
+
+    1. Install LLVM:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+       vi build_config_deploy_kodiak.xml
+       # Edit all the occurrences of /pkg/qct/software/llvm/release/arm/16.0.7/ to <FIRMWARE_ROOT>/llvm/16.0.7/
+       ```
+    2. Clean the build:
+       ```text
+       python build_all.py -b TZ.XF.5.0 CHIPSET=kodiak --cfg=build_config_deploy_kodiak.xml --clean
+       ```
+    3. Build the image:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+       python build_all.py -b TZ.XF.5.0 CHIPSET=kodiak --cfg=build_config_deploy_kodiak.xml
+       ```
+
+    **Build AOP firmware**
+
+    **Tools required**
+
+    - Compiler version: LLVM 14.0.4
+    - Python version: Python 3.10
+
+    **Build steps**
+
+    1. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/AOP.HO.3.6/aop_proc/build/
+       ```
+    2. Clean the build:
+       ```text
+       ./build_kodiak.sh -c -l <FIRMWARE_ROOT>/llvm/14.0.4/
+       ```
+    3. Build the image:
+       ```text
+       ./build_kodiak.sh -l <FIRMWARE_ROOT>/llvm/14.0.4/
+       ```
+
+    **Build MPSS**
+
+    <Note>
+      **Note**
+
+      This build is applicable only for `Qualcomm_Linux.SPF.2.0|AMSS|Standard|OEM|`.
+    </Note>
+
+    **Tools required**
+
+    - Compiler version: Hexagon 8.4.10
+    - Python version: Python 3.8.2
+
+    **Build steps**
+
+    1. Nanopb integration (one-time setup):
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_amss_standard_oem/MPSS.HI.4.3.3.c6.2/modem_proc/ssc_api
+                 curl https://jpa.kapsi.fi/nanopb/download/nanopb-0.3.9.5-linux-x86.tar.gz -o nanopb-0.3.9.5-linux-x86.tar.gz
+                 cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_amss_standard_oem/MPSS.HI.4.3.3.c6.2/modem_proc
+                 python ssc_api/build/config_nanopb_dependency.py -f  nanopb-0.3.9.5-linux-x86
+       ```
+    2. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_amss_standard_oem/MPSS.HI.4.3.3.c6.2/modem_proc/build/ms
+       ```
+    3. Clean the build:
+       ```text
+       python build_variant.py kodiak.gen.prod --clean
+       ```
+    4. Build the image:
+       ```text
+       python build_variant.py kodiak.gen.prod bparams=-k
+       ```
+
+    **CPUCP firmware**
+
+    Qualcomm releases the CPUCP firmware as a binary and you don’t need to compile the build.
+
+    **CPUSYS.VM firmware**
+
+    Qualcomm releases the CPUSYS.VM firmware as a binary and you don’t need to compile the build.
+
+    **BTFM firmware**
+
+    Qualcomm releases the BTFM firmware as a binary and you don’t need to compile the build.
+
+    **WLAN firmware**
+
+    Qualcomm releases the WLAN firmware as a binary and you don’t need to compile the build.
+
+    **Generate firmware prebuilts (boot-critical and split-firmware binaries)**
+
+    - Create an integrated firmware binary from the individual components that you compiled:
+      ```text
+      cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCM6490.LE.2.0/common/build
+      python build.py --imf
+      ```
+    - Firmware prebuilt is successful if the following zip files are generated in the `<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCM6490.LE.2.0/common/build/ufs/bin` directory:
+      - `QCM6490_bootbinaries.zip`
+      - `QCM6490_dspso.zip`
+      - `QCM6490_fw.zip`
+  </Tab>
+  <Tab title="IQ-9075">
+    **Prerequisites**
+
+    - Ensure that the working shell is `bash`.
+      ```text
+      echo $0
+      ```
+      The expected output of the command should be `bash`. If not, enter the bash shell:
+      ```text
+      bash
+      ```
+    - Install the libffi6 package using the following commands. This is required for the QAIC compiler, which generates the header and the source files from the IDL files:
+      ```text
+      curl -LO http://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi6_3.2.1-8_amd64.deb
+      sudo dpkg -i libffi6_3.2.1-8_amd64.deb
+      ```
+    - Install LLVM for AOP, Qualcomm TEE, and boot compilation:
+      ```text
+      cd <FIRMWARE_ROOT>
+      mkdir llvm
+      # Sign in to qsc-cli and activate the license
+      qsc-cli login
+      qsc-cli tool activate-license --name sdllvm_arm
+      # LLVM requirement for boot compilation is 14.0.4
+      qsc-cli tool install --name sdllvm_arm --required-version 14.0.4 --path <FIRMWARE_ROOT>/llvm/14.0.4
+      chmod -R 777 <FIRMWARE_ROOT>/llvm/14.0.4
+      # LLVM requirement for the Qualcomm TEE compilation is 16.0.7
+      qsc-cli tool install --name sdllvm_arm --required-version 16.0.7 --path <FIRMWARE_ROOT>/llvm/16.0.7
+      chmod -R 777 <FIRMWARE_ROOT>/llvm/16.0.7
+      ```
+    - Export the `SECTOOLS` variable and compile the firmware builds (`<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem` is the top-level directory):
+      ```text
+      export SECTOOLS=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS9100.LE.2.0/common/sectoolsv2/ext/Linux/sectools
+      export SECTOOLS_DIR=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS9100.LE.2.0/common/sectoolsv2/ext/Linux
+      ```
+    - Install and set up Hexagon. Set the environment variable HEXAGON\_ROOT to the path where the Hexagon SDK is installed. To change the install path when using `qsc-cli`, see [Change the Hexagon tool install path](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#change-hex-tool-install-path).
+      ```text
+      qsc-cli tool extract --name hexagon8.6 --required-version 8.6.05.2
+      export HEXAGON_ROOT=$HOME/Qualcomm/HEXAGON_Tools
+      echo $HEXAGON_ROOT
+      ```
+
+    **Build DSP**
+
+    **Tools required**
+
+    - Compiler version: Hexagon 8.6.05.2
+    - Python version: Python 3.8.2
+
+    **Build steps**
+
+    1. Install the device tree compiler:
+       ```text
+       sudo apt-get install device-tree-compiler
+       export DTC_PATH=/usr/bin
+       ```
+    2. Install the dependencies:
+       ```text
+       pip install ruamel.yaml==0.17.17
+       pip install dtschema==2021.10
+       pip install jsonschema==4.0.0
+       ```
+    3. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/DSP.AT.1.0.1/dsp_proc/build/ms
+       ```
+    4. Clean the build:
+       ```text
+       python ./build_variant.py lemans.adsp.prod --clean
+       python ./build_variant.py lemans.cdsp0.prod --clean
+       python ./build_variant.py lemans.cdsp1.prod --clean
+       python ./build_variant.py lemans.gpdsp0.prod --clean
+       python ./build_variant.py lemans.gpdsp1.prod --clean
+       ```
+    5. Build the image:
+       ```text
+       python ./build_variant.py lemans.adsp.prod && python ./build_variant.py lemans.cdsp0.prod && python ./build_variant.py lemans.cdsp1.prod && python ./build_variant.py lemans.gpdsp0.prod && python ./build_variant.py lemans.gpdsp1.prod
+       ```
+
+    **Build Boot**
+
+    **Tools required**
+
+    - Compiler version: LLVM version must be updated to 14.0.4
+      ```text
+      export LLVM=<FIRMWARE_ROOT>/llvm/14.0.4/
+      ```
+    - Python version: Python 3.10
+    - libffi6 package
+
+    **Build steps**
+
+    1. Install the device tree compiler:
+       ```text
+       sudo apt-get install device-tree-compiler
+       export DTC=/usr/bin
+       ```
+    2. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/BOOT.MXF.1.0.c1/
+       ```
+    3. Install the dependencies:
+       ```text
+       python -m pip install -r boot_images/boot_tools/dtschema_tools/oss/requirements.txt
+       pip install json-schema-for-humans
+       ```
+    4. Clean the build:
+       ```text
+       python -u boot_images/boot_tools/buildex.py -t lemans,QcomToolsPkg -v LAA -r RELEASE --build_flags=cleanall
+       ```
+    5. Build the image:
+       ```text
+       python -u boot_images/boot_tools/buildex.py -t lemans,QcomToolsPkg -v LAA -r RELEASE
+       ```
+       <Note>
+         **Note** For debug variant builds, replace `RELEASE` with `DEBUG`.
+       </Note>
+
+    **Build Qualcomm TEE firmware**
+
+    **Tools required**
+
+    - Compiler version: LLVM 16.0.7
+    - Python version: Python 3.10
+
+    **Build steps**
+
+    1. Install LLVM:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+       vi build_config_deploy_lemans.xml
+       # Edit all the occurrences of /pkg/qct/software/llvm/release/arm/16.0.7/ to <FIRMWARE_ROOT>/llvm/16.0.7/
+       ```
+    2. Clean the build:
+       ```text
+       python build_all.py -b TZ.XF.5.0 CHIPSET=lemans --cfg=build_config_deploy_lemans.xml --clean
+       ```
+    3. Build the image:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+       python build_all.py -b TZ.XF.5.0 CHIPSET=lemans --cfg=build_config_deploy_lemans.xml
+       ```
+
+    **Build AOP firmware**
+
+    **Tools required**
+
+    - Compiler version: LLVM 14.0.4
+    - Python version: Python 3.10
+
+    **Build steps**
+
+    1. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/AOP.HO.3.6.1/aop_proc/build/
+       ```
+    2. Clean the build:
+       ```text
+       ./build_lemansau.sh -c -l <FIRMWARE_ROOT>/llvm/14.0.4/
+       ```
+    3. Build the image:
+       ```text
+       ./build_lemansau.sh -l <FIRMWARE_ROOT>/llvm/14.0.4/
+       ```
+
+    **CPUCP firmware**
+
+    Qualcomm releases the CPUCP firmware as a binary and you don’t need to compile the build.
+
+    **CPUSYS.VM firmware**
+
+    Qualcomm releases the CPUSYS.VM firmware as a binary and you don’t need to compile the build.
+
+    **BTFM firmware**
+
+    Qualcomm releases the BTFM firmware as a binary and you don’t need to compile the build.
+
+    **WLAN firmware**
+
+    Qualcomm releases the WLAN firmware as a binary and you don’t need to compile the build.
+
+    **Generate firmware prebuilts (boot-critical and split-firmware binaries)**
+
+    - Create an integrated firmware binary from the individual components that you compiled:
+      ```text
+      cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS9100.LE.2.0/common/build
+      python build.py --imf
+      ```
+    - Firmware prebuilt is successful if the following zip files are generated in the `<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS9100.LE.2.0/common/build/ufs/bin` directory:
+      - `QCS9100_bootbinaries.zip`
+      - `QCS9100_dspso.zip`
+      - `QCS9100_fw.zip`
+  </Tab>
+  <Tab title="IQ-8275">
+    **Prerequisites**
+
+    - Ensure that the working shell is `bash`.
+      ```text
+      echo $0
+      ```
+      The expected output of the command should be `bash`. If not, enter the bash shell:
+      ```text
+      bash
+      ```
+    - Install the libffi6 package using the following commands. This is required for the QAIC compiler, which generates the header and the source files from the IDL files:
+      ```text
+      curl -LO http://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi6_3.2.1-8_amd64.deb
+      sudo dpkg -i libffi6_3.2.1-8_amd64.deb
+      ```
+    - Install LLVM for AOP, Qualcomm TEE, and boot compilation:
+      ```text
+      cd <FIRMWARE_ROOT>
+      mkdir llvm
+      # Sign in to qsc-cli and activate the license
+      qsc-cli login
+      qsc-cli tool activate-license --name sdllvm_arm
+      # LLVM requirement for boot compilation is 14.0.4
+      qsc-cli tool install --name sdllvm_arm --required-version 14.0.4 --path <FIRMWARE_ROOT>/llvm/14.0.4
+      chmod -R 777 <FIRMWARE_ROOT>/llvm/14.0.4
+      # LLVM requirement for the Qualcomm TEE compilation is 16.0.7
+      qsc-cli tool install --name sdllvm_arm --required-version 16.0.7 --path <FIRMWARE_ROOT>/llvm/16.0.7
+      chmod -R 777 <FIRMWARE_ROOT>/llvm/16.0.7
+      ```
+    - Export the `SECTOOLS` variable and compile the firmware builds (`<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem` is the top-level directory):
+      ```text
+      export SECTOOLS=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux/sectools
+      export SECTOOLS_DIR=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux
+      ```
+    - Install and set up Hexagon. Set the environment variable HEXAGON\_ROOT to the path where the Hexagon SDK is installed. To change the install path when using `qsc-cli`, see [Change the Hexagon tool install path](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#change-hex-tool-install-path).
+      ```text
+      qsc-cli tool extract --name hexagon8.6 --required-version 8.6.05.2
+      qsc-cli tool extract --name hexagon8.7 --required-version 8.7.02.1
+      export HEXAGON_ROOT=$HOME/Qualcomm/HEXAGON_Tools
+      echo $HEXAGON_ROOT
+      ```
+
+    **Build DSP**
+
+    **Tools required**
+
+    - Compiler version: Hexagon 8.6.05.2 and 8.7.02.1
+    - Python version: Python 3.8.2
+
+    **Build steps**
+
+    1. Install the device tree compiler:
+       ```text
+       sudo apt-get install device-tree-compiler
+       export DTC_PATH=/usr/bin
+       ```
+    2. Install the dependencies:
+       ```text
+       pip install ruamel.yaml==0.17.17
+       pip install dtschema==2021.10
+       pip install jsonschema==4.0.0
+       ```
+    3. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/DSP.AT.1.0.1/dsp_proc/build/ms
+       ```
+    4. Clean the build:
+       ```text
+       python ./build_variant.py lemans.adsp.prod --clean
+       python ./build_variant.py monaco.cdsp0.prod --clean
+       python ./build_variant.py lemans.gpdsp0.prod --clean
+       ```
+    5. Build the image:
+       ```text
+       python ./build_variant.py lemans.adsp.prod && python ./build_variant.py monaco.cdsp0.prod && python ./build_variant.py lemans.gpdsp0.prod
+       ```
+
+    **Build Boot**
+
+    **Tools required**
+
+    - Compiler version: LLVM version must be updated to 14.0.4
+      ```text
+      export LLVM=<FIRMWARE_ROOT>/llvm/14.0.4/
+      ```
+    - Python version: Python 3.10
+    - libffi6 package
+
+    **Build steps**
+
+    1. Install the device tree compiler:
+       ```text
+       sudo apt-get install device-tree-compiler
+       export DTC=/usr/bin
+       ```
+    2. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/BOOT.MXF.1.0.c1/
+       ```
+    3. Install the dependencies:
+       ```text
+       python -m pip install -r boot_images/boot_tools/dtschema_tools/oss/requirements.txt
+       pip install json-schema-for-humans
+       ```
+    4. Clean the build:
+       ```text
+       python -u boot_images/boot_tools/buildex.py -t monaco,QcomToolsPkg -v LAA -r RELEASE --build_flags=cleanall
+       ```
+    5. Build the image:
+       ```text
+       python -u boot_images/boot_tools/buildex.py -t monaco,QcomToolsPkg -v LAA -r RELEASE
+       ```
+       <Note>
+         **Note** For debug variant builds, replace `RELEASE` with `DEBUG`.
+       </Note>
+
+    **Build Qualcomm TEE firmware**
+
+    **Tools required**
+
+    - Compiler version: LLVM 16.0.7
+    - Python version: Python 3.10
+
+    **Build steps**
+
+    1. Install LLVM:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+       vi build_config_deploy_monaco.xml
+       # Edit all the occurrences of /pkg/qct/software/llvm/release/arm/16.0.7/ to <FIRMWARE_ROOT>/llvm/16.0.7/
+       ```
+    2. Clean the build:
+       ```text
+       python build_all.py -b TZ.XF.5.0 CHIPSET=monaco --cfg=build_config_deploy_monaco.xml --clean
+       ```
+    3. Build the image:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+       python build_all.py -b TZ.XF.5.0 CHIPSET=monaco --cfg=build_config_deploy_monaco.xml
+       ```
+
+    **Build AOP firmware**
+
+    **Tools required**
+
+    - Compiler version: LLVM 14.0.4
+    - Python version: Python 3.10
+
+    **Build steps**
+
+    1. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/AOP.HO.3.6.1/aop_proc/build/
+       ```
+    2. Clean the build:
+       ```text
+       ./build_monaco.sh -c -l <FIRMWARE_ROOT>/llvm/14.0.4/
+       ```
+    3. Build the image:
+       ```text
+       ./build_monaco.sh -l <FIRMWARE_ROOT>/llvm/14.0.4/
+       ```
+
+    **CPUCP firmware**
+
+    Qualcomm releases the CPUCP firmware as a binary and you don’t need to compile the build.
+
+    **CPUSYS.VM firmware**
+
+    Qualcomm releases the CPUSYS.VM firmware as a binary and you don’t need to compile the build.
+
+    **BTFM firmware**
+
+    Qualcomm releases the BTFM firmware as a binary and you don’t need to compile the build.
+
+    **WLAN firmware**
+
+    Qualcomm releases the WLAN firmware as a binary and you don’t need to compile the build.
+
+    **Generate firmware prebuilts (boot-critical and split-firmware binaries)**
+
+    - Create an integrated firmware binary from the individual components that you compiled:
+      ```text
+      cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/build
+      python build.py --imf
+      ```
+    - Firmware prebuilt is successful if the following zip files are generated in the `<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/build/ufs/bin` directory:
+      - `QCS8300_bootbinaries.zip`
+      - `QCS8300_dspso.zip`
+      - `QCS8300_fw.zip`
+  </Tab>
+  <Tab title="IQ-615">
+    **Prerequisites**
+
+    - Ensure that the working shell is `bash`.
+      ```text
+      echo $0
+      ```
+      The expected output of the command should be `bash`. If not, enter the bash shell:
+      ```text
+      bash
+      ```
+    - Install the libffi6 package using the following commands. This is required for the QAIC compiler, which generates the header and the source files from the IDL files:
+      ```text
+      curl -LO http://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi6_3.2.1-8_amd64.deb
+      sudo dpkg -i libffi6_3.2.1-8_amd64.deb
+      ```
+    - Install Python 2.7.18:
+      ```text
+      wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
+      tar -xvf Python-2.7.18.tgz
+      cd Python-2.7.18
+      ./configure
+      make
+      sudo make install
+      ```
+    - Install LLVM for AOP, Qualcomm TEE, and boot compilation:
+      ```text
+      cd <FIRMWARE_ROOT>
+      mkdir llvm
+      # Sign in to qsc-cli and activate the license
+      qsc-cli login
+      qsc-cli tool activate-license --name sdllvm_arm
+      # LLVM requirement for AOP is 3.9.3
+      mkdir -p /pkg/qct/software/llvm
+      qsc-cli tool install --name sdllvm_arm --required-version 3.9.3 --path /pkg/qct/software/llvm/release/arm/3.9.3
+      chmod -R 777 /pkg/qct/software/llvm/release/arm/3.9.3
+      # LLVM requirement for boot compilation is 14.0.4
+      qsc-cli tool install --name sdllvm_arm --required-version 14.0.4 --path <FIRMWARE_ROOT>/llvm/14.0.4
+      chmod -R 777 <FIRMWARE_ROOT>/llvm/14.0.4
+      # LLVM requirement for Qualcomm TrustZone compilation is 16.0.7
+      qsc-cli tool install --name sdllvm_arm --required-version 16.0.7 --path <FIRMWARE_ROOT>/llvm/16.0.7
+      chmod -R 777 <FIRMWARE_ROOT>/llvm/16.0.7
+      ```
+    - Export the `SECTOOLS` variable and compile the firmware builds (`<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem` is the top-level directory):
+      ```text
+      export SECTOOLS=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS615.LE.2.0/common/sectoolsv2/ext/Linux/sectools
+      export SECTOOLS_DIR=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS615.LE.2.0/common/sectoolsv2/ext/Linux
+      ```
+    - Install and set up Hexagon. Set the environment variable HEXAGON\_ROOT to the path where the Hexagon SDK is installed. To change the install path when using `qsc-cli`, see [Change the Hexagon tool install path](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#change-hex-tool-install-path).
+      ```text
+      qsc-cli tool extract --name hexagon8.2 --required-version 8.2.05.1
+      export HEXAGON_ROOT=$HOME/Qualcomm/HEXAGON_Tools
+      echo $HEXAGON_ROOT
+      ```
+
+    **Build cDSP**
+
+    **Tools required**
+
+    - Compiler version: Hexagon 8.2.05
+    - Python version: Python 2.7.18
+    - libffi6 package
+
+    **Build steps**
+
+    1. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/CDSP.VT.2.2.c4
+       ```
+    2. Clean the build:
+       ```text
+       python cdsp_proc/build/build.py -c sm6150 -o clean -f CDSP
+       ```
+    3. Build the image:
+       ```text
+       python cdsp_proc/build/build.py -c sm6150 -o all -f CDSP
+       ```
+
+    **Build aDSP**
+
+    **Tools required**
+
+    - Compiler version: Hexagon 8.2.05
+    - Python version: Python 2.7.18
+    - libffi6 package
+
+    **Build steps**
+
+    1. Nanopb integration (one-time setup):
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/ADSP.VT.5.2.c6/adsp_proc/ssc_api
+       curl https://jpa.kapsi.fi/nanopb/download/nanopb-0.3.9.5-linux-x86.tar.gz -o nanopb-0.3.9.5-linux-x86.tar.gz
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/ADSP.VT.5.2.c6/adsp_proc/
+       python ssc_api/build/config_nanopb_dependency.py -f nanopb-0.3.9.5-linux-x86
+       ```
+    2. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/ADSP.VT.5.2.c6
+       ```
+    3. Clean the build:
+       ```text
+       python adsp_proc/build/build.py -c sm6150 -o clean -f ADSP
+       ```
+    4. Build the image:
+       ```text
+       python adsp_proc/build/build.py -c sm6150 -o all -f ADSP
+       ```
+
+    **Build AOP**
+
+    **Tools required**
+
+    - Compiler version: LLVM 3.9.3
+    - Python version: Python 2.7.18
+
+    **Build steps**
+
+    1. Navigate to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/AOP.HO.3.6.2/aop_proc/build/
+       ```
+    2. Clean the build:
+       ```text
+       ./build_TalosAU.sh -c
+       ```
+    3. Build the image:
+       ```text
+       ./build_TalosAU.sh
+       ```
+
+    **Build Boot**
+
+    **Tools required**
+
+    - Compiler version: LLVM version must be updated to 14.0.4
+      ```text
+      export LLVM=<FIRMWARE_ROOT>/llvm/14.0.4/
+      ```
+
+    <Note>
+      **Note**
+
+      To avoid build errors, ensure that there is a / at the end of the command
+    </Note>
+
+    - Python version: Python 3.10
+
+    **Build steps**
+
+    1. Install the device tree compiler:
+       ```text
+       sudo apt-get install device-tree-compiler
+       export DTC=/usr/bin
+       ```
+    2. Go to the following directory:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/BOOT.MXF.1.0.c1/
+       ```
+    3. Install the dependencies:
+       ```text
+       python -m pip install -r boot_images/boot_tools/dtschema_tools/oss/requirements.txt
+       pip install json-schema-for-humans
+       ```
+    4. Clean the build:
+       ```text
+       python -u boot_images/boot_tools/buildex.py -t talos,QcomToolsPkg -v LAA -r RELEASE --build_flags=cleanall
+       ```
+    5. Build the image:
+       ```text
+       python -u boot_images/boot_tools/buildex.py -t talos,QcomToolsPkg -v LAA -r RELEASE
+       ```
+       <Note>
+         **Note** For debug variant builds, replace `RELEASE` with `DEBUG`.
+       </Note>
+       **Note** For debug variant builds, replace `RELEASE` with `DEBUG`.
+
+    **Build TrustZone**
+
+    **Tools required**
+
+    - Compiler version: LLVM 16.0.7
+    - Python version: Python 3.10
+
+    **Build steps**
+
+    1. Install LLVM:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+       vi build_config_deploy_talos.xml
+       # Edit all the occurrences of /pkg/qct/software/llvm/release/arm/16.0.7/ to <FIRMWARE_ROOT>/llvm/16.0.7/
+       ```
+    2. Clean the build:
+       ```text
+       python build_all.py -b TZ.XF.5.0 CHIPSET=talos --cfg=build_config_deploy_talos.xml --clean
+       ```
+    3. Build the image:
+       ```text
+       cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+       python build_all.py -b TZ.XF.5.0 CHIPSET=talos --cfg=build_config_deploy_talos.xml
+       ```
+
+    **BTFM firmware**
+
+    Qualcomm releases the BTFM firmware as a binary and you don’t need to compile the build.
+
+    **WLAN firmware**
+
+    Qualcomm releases the WLAN firmware as a binary and you don’t need to compile the build.
+
+    **Generate firmware prebuilts (boot-critical and split-firmware binaries)**
+
+    - Create an integrated firmware binary from the individual components that you compiled:
+      ```text
+      cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS615.LE.2.0/common/build
+      python build.py --imf
+      ```
+    - Firmware prebuilt is successful if the following zip files are generated in the `<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS615.LE.2.0/common/build/common/bin` directory:
+      - `QCS615_bootbinaries.zip`
+      - `QCS615_dspso.zip`
+      - `QCS615_fw.zip`
+  </Tab>
+</Tabs>
+
+### **Build a BSP image**
+
+The BSP image build has software components to support the Qualcomm device and software features applicable to the Qualcomm SoCs. This build includes a reference distribution configuration for the Qualcomm development kits.
+
+1. Download Qualcomm Yocto and the supporting layers. For the `<meta-qcom-release>` information, see the section _Build-critical release tags_ in the [Release Notes](https://docs.qualcomm.com/doc/80-80021-300/).
+   ```text
+   cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem
+   # create directory where the BSP image will be built
+   mkdir LE.QCLINUX.2.0
+   cd LE.QCLINUX.2.0
+   git clone https://github.com/qualcomm-linux/meta-qcom-releases -b <meta-qcom-release>
+   # Example, git clone https://github.com/qualcomm-linux/meta-qcom-releases -b qli-2.0-rc3
+   kas checkout meta-qcom-releases/lock.yml
+   ```
+2. Copy the kas lock file from `meta-qcom-releases` to `meta-qcom`. You must run this step; otherwise, the checked‑out meta layers may update to a newer commit.
+   ```text
+   # kas configuration files must be a part of the same repository
+   # copy the kas lock file to meta-qcom repository
+   cp meta-qcom-releases/lock.yml meta-qcom/ci/lock.yml
+   ```
+3. [Set up local firmware binaries](https://docs.qualcomm.com/doc/80-80021-254/topic/setup_local_firmware.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#setup-local-firmware) in your Yocto build.
+4. Build the software image. Build targets are defined based on machine and distribution combinations:
+   ```text
+   kas shell -c "devtool build-image <image-recipe>" meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/linux-qcom-6.18.yml:meta-qcom/ci/lock.yml
+   # Example, kas shell -c "devtool build-image qcom-multimedia-proprietary-image" meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/linux-qcom-6.18.yml:meta-qcom/ci/lock.yml
+   ```
+   For various `<machine>` and `<distro>` combinations, see [Release Notes](https://docs.qualcomm.com/doc/80-80021-300/).
+   <Note>
+     **Note** To build images in a fully isolated environment, you can try using [kas-container](https://kas.readthedocs.io/en/latest/userguide/kas-container.html).
+   </Note>
+5. After a successful build, check if the `rootfs.img` file exists in the build artifacts:
+   ```text
+   # meta-qcom uses qcomflash IMAGE_FSTYPE to create a single tarball
+   # containing all the relevant files to perform a full clean flash,
+   # including partition metadata, boot firmware, ESP partition, and rootfs.
+   cd <workspace-dir>/build/tmp/deploy/images/<MACHINE>/<IMAGE>-<MACHINE>.rootfs.qcomflash/
+   ls -al rootfs.img
+   ```
+6. Flash the generated build using [Flash software images](https://docs.qualcomm.com/doc/80-80021-254/topic/flash_images.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2).
+
+<Note>
+  **Note**
+
+  For repo manifest based builds, see [Alternative build instructions using Manifest](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#howto-build).
+</Note>
