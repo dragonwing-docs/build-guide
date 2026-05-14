@@ -353,77 +353,43 @@ If you face USB or Ethernet connectivity issues on the device, consider updating
 
 .. rubric:: Update the firmware
 
-1. Register and sign in to `Renesas <https://www.renesas.com/>`__.
+**Option 1 (Ubuntu)**
 
-#. `Download the firmware <https://www.renesas.com/en/products/interface/usb-switches-hubs/upd720201-usb-30-host-controller#design_development>`__.
+Push the firmware files using SCP or similar tools. For example,
 
-#. Create the ``usb_fw.img`` image and copy the USB firmware:
+.. container:: nohighlight
+      
+   ::
+
+      scp renesas_usb_fw.mem root@10.92.175.138:/lib/firmware
+
+**Option 2 (Yocto)**
+
+1. Connect the device to the Host PC using a USB cable for ADB:
+
+#. Push firmware to the device:
 
    .. container:: nohighlight
       
       ::
 
-         dd if=/dev/zero of=usb_fw.img bs=4k count=240
-         mkfs -t ext4 usb_fw.img
-         mkdir usb_fw
-         sudo mount -o loop usb_fw.img usb_fw/
-         sudo cp -rf renesas_usb_fw.mem usb_fw
-         sudo umount usb_fw
+         adb push renesas_usb_fw.mem /lib/firmware
 
-#. Start the device in Fastboot mode:
+#. Activate the firmware by performing either of the following options:
 
-   .. container:: nohighlight
+   - Option A – Reboot the target for USB type A ports.
+   - Option B – Manually bind the Renesas xHCI driver.
+
+     .. container:: nohighlight
       
-      ::
+        ::
 
-         adb root
-         adb shell
-         reboot bootloader
+           echo "0001:04:00.0" > /sys/bus/pci/drivers/xhci-pci-renesas/bind
 
-#. Check if the device is in Fastboot mode:
-
-   .. container:: nohighlight
-      
-      ::
-
-         fastboot devices
-
-   .. container:: screenoutput
-
-      .. line-block::
-
-         7dc85f5e     fastboot
-
-#. Flash the ``usb_fw.img`` image to the device:
-
-   .. container:: nohighlight
-      
-      ::
-
-         fastboot erase usb_fw
-         fastboot flash usb_fw usb_fw.img
-         fastboot reboot
-
-   .. container:: screenoutput
-
-      c:\>fastboot erase usb_fw
-      Erasing 'usb_fw' FAILED (remote: 'Check device console.')
-      fastboot: error: Command failed
-
-#. Verify if the firmware is successfully updated:
+#. Verify firmware enumeration:
 
    .. container:: nohighlight
 
       ::
 
          dmesg
-
-   Sample log after the firmware is successfully updated.
-
-   .. container:: screenoutput
-
-      [    6.589462] usbcore: registered new device driver onboard-usb-hub
-      [    6.653277] usb 2-1: new SuperSpeed USB device number 2 using xhci_hcd
-      [    7.013061] usb 2-1.1: new SuperSpeed USB device number 3 using xhci_hcd
-      [    7.120657] ax88179_178a 2-1.1:1.0 eth0: register 'ax88179_178a' at usb-0001:04:00.0-1.1, ASIX AX88179 USB 3.0 Gigabit Ethernet, 3e:9e:5e:ff:d3:fb
-      [    7.120767] usbcore: registered new interface driver ax88179_178a
