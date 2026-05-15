@@ -289,10 +289,10 @@ Establish the :ref:`network connectivity <connect_to_network>` before connecting
 Configure Ethernet with RJ45 port
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Ethernet/RJ45 port is enabled as a downstream port of PCIe to USB controller (``renesas``). Ensure that the ``renesas_usb_fw.mem`` file is available at the ``var/usbfw`` directory.
+Ethernet/RJ45 port is enabled as a downstream port of PCIe to USB controller (``renesas``). Ensure that the ``renesas_usb_fw.mem`` file is available at the ``/lib/firmware`` directory.
 
 .. note:: 
-   - If the ``renesas_usb_fw.mem`` firmware isn't available at the ``var/usbfw`` directory, then :ref:`update USB and Ethernet controller firmware <update_usb_eth_controller>`.
+   - If the ``renesas_usb_fw.mem`` firmware isn't available at the ``/lib/firmware`` directory, then :ref:`update USB and Ethernet controller firmware <update_usb_eth_controller>`.
 
 To check if the USB to Ethernet controller is enumerated, run the following command:
 
