@@ -342,54 +342,79 @@ To check the Ethernet IP address, run the following command:
 Update USB and Ethernet controller firmware
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you face USB or Ethernet connectivity issues on the device, consider updating the firmware for the USB controller.
+A firmware update to the USB controller may solve USB or Ethernet connectivity issues on the Dragonwing RB3 Gen 2 device.
 
-.. rubric:: Prerequisites
+**Prerequisites**
 
-- Upgrade the software as described in `Update the software <https://docs.qualcomm.com/bundle/publicresource/topics/80-80022-251/upgrade-rb3gen2-software.html>`__ before updating the Renesas firmware.
-- Connect the device to the Linux host through the USB Type-C cable.
+- Ensure that you upgrade the software as described in `Update the software <https://docs.qualcomm.com/doc/80-80022-251/topic/upgrade-rb3gen2-software.html>`__ before updating the Renesas firmware.
+- Ensure that you install the `ADB <https://docs.qualcomm.com/bundle/publicresource/topics/80-80022-251/faqs.html#install-adb>`__ tool. Fastboot comes installed along with it.
+- Connect the device to the Ubuntu host computer using a USB Type-C cable.
 
-.. note:: The following procedure is applicable only to Ubuntu 22.04 host. If you are using a Windows or macOS host, set up an Ubuntu virtual machine by following the instructions described in the `Virtual Machine Setup Guide <https://docs.qualcomm.com/bundle/publicresource/topics/80-80022-41/getting-started.html>`__.
+**Procedure**
 
-.. rubric:: Update the firmware
-
-**Option 1 (Ubuntu)**
-
-Push the firmware files using SCP or similar tools. For example,
-
-.. container:: nohighlight
-      
-   ::
-
-      scp renesas_usb_fw.mem root@10.92.175.138:/lib/firmware
-
-**Option 2 (Yocto)**
-
-1. Connect the device to the Host PC using a USB cable for ADB:
-
-#. Push firmware to the device:
+1. `Download the firmware <https://www.renesas.com/us/en/products/interface/usb-switches-hubs/upd720201-usb-30-host-controller#design_development>`__, register, and sign in to `Renesas <https://www.renesas.com/>`__. 
+#. Rename the downloaded firmware file to ``renesas_usb_fw.mem``.
+#. Connect the device to the host computer using a USB cable for ADB.
+#. Push the firmware to the device using one of the following commands:
 
    .. container:: nohighlight
-      
+
       ::
 
          adb push renesas_usb_fw.mem /lib/firmware
 
-#. Activate the firmware by performing either of the following options:
+   OR
 
-   - Option A – Reboot the target for USB type A ports.
+   .. container:: nohighlight
+
+      ::
+
+         scp renesas_usb_fw.mem root@<ip-address-of-device>:/lib/firmware
+
+   Example:
+
+   .. container:: screenoutput
+
+      .. code:: nohighlight
+
+         scp renesas_usb_fw.mem root@10.92.175.138:/lib/firmware   
+
+#. Activate the firmware using either of the following options:
+
+   - Option A – Reboot target for USB type A ports.
    - Option B – Manually bind the Renesas xHCI driver.
 
      .. container:: nohighlight
-      
+
         ::
 
            echo "0001:04:00.0" > /sys/bus/pci/drivers/xhci-pci-renesas/bind
+
+   .. note:: To retrieve the device ID, use the following command:
+
+      .. container:: nohighlight
+
+         ::
+
+            sh-5.3# lspci
+
+      In the following sample output, ``0001:04:00.0`` is the device ID.
+
+      .. container:: screenoutput
+
+         0001:00:00.0 PCI bridge: Qualcomm Technologies, Inc SM8250 PCIe Root Complex [Snapdragon 865/870 5G]
+         0001:01:00.0 PCI bridge: Toshiba Corporation Device 0623
+         0001:02:01.0 PCI bridge: Toshiba Corporation Device 0623
+         0001:02:02.0 PCI bridge: Toshiba Corporation Device 0623
+         0001:02:03.0 PCI bridge: Toshiba Corporation Device 0623
+         0001:04:00.0 USB controller: Renesas Electronics Corp. uPD720201 USB 3.0 Host Controller (rev 03)
+         0001:05:00.0 Ethernet controller: Toshiba Corporation Device 0220
+         0001:05:00.1 Ethernet controller: Toshiba Corporation Device 0220 
 
 #. Verify firmware enumeration:
 
    .. container:: nohighlight
 
-      ::
+      :: 
 
          dmesg
