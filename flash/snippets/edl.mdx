@@ -1,0 +1,56 @@
+The device must be in the EDL mode before you flash the software image.
+The Qualcomm supported device by default enters EDL mode if there is no
+image on the device after power up or if it’s corrupted. Follow these
+steps to force the device into EDL mode
+
+<Tabs>
+  <Tab title="QCS6490/QCS5430">
+    - Press and hold the **F_DL** button.
+     ![Figure: RB3Gen2_device](../../media/k2c-qli-build-ga/RB3Gen2_device.png)
+    - Connect the device to a **+12 V wall power supply**.
+    - Connect the device to the host system using a Type-C cable through the USB Type-C connector.
+    - Release the **F_DL** button. The device is now EDL mode.
+  </Tab>
+  <Tab title="IQ-9075">
+    <Tabs>
+      <Tab title="IQ-9 Beta Evaluation Kit (EVK)">
+        - Put the device in EDL mode by turning on the dip switch S5-4.
+          ![Figure: qcs9075_qdl_mode_manual](../../media/k2c-qli-build-ga/qcs9075_qdl_mode_manual.png)
+        - Turn off the S5-4 dip once the entire flashing process is complete.
+      </Tab>
+      <Tab title="IQ-9075 EVK">
+        - Put the device in EDL mode by turning on the dip switch SW2-3.
+          ![Figure: IQ_9075_EVK](../../media/k2c-qli-build-ga/IQ_9075_EVK.png)
+        - Turn off the S2-8 dip switch once the entire flashing process is complete.
+      </Tab>
+    </Tabs>
+  </Tab>
+  <Tab title="IQ-8275">
+    <Tabs>
+      <Tab title="IQ-8 Beta Evaluation Kit (EVK)">
+        - Put the device in EDL mode by turning on the dip switch S5-4.
+        ![Figure: qcs9075_qdl_mode_manual](../../media/k2c-qli-build-ga/qcs9075_qdl_mode_manual.png)
+        - Turn off the S5-4 dip switch once the entire flashing process is complete.
+      </Tab>
+      <Tab title="IQ-8275 EVK">
+        - Put the device in EDL mode by turning on the dip switch S2-8.
+        ![Figure: IQ_9075_EVK](../../media/k2c-qli-build-ga/IQ_9075_EVK.png)
+        - Turn off the S2-8 dip switch once the entire flashing process is complete.
+      </Tab>
+    </Tabs>
+  </Tab>
+  <Tab title="IQ-615">
+    - Put the device in EDL mode by turning off the SW switch and turning on the dip switch SW3-4.
+      ![Figure: qcs615_qdl_mode_manual](../../media/k2c-qli-build-ga/qcs615_qdl_mode_manual.png)
+    - Turn on the SW switch and turn off the SW3-4 dip switch once the entire flashing process is complete.
+  </Tab>
+</Tabs>
+
+Verify if the device is in EDL mode by running the following command
+```bash
+lsusb
+```
+
+```text Expected output
+Bus 002 Device 014: ID 05c6:9008 Qualcomm, Inc. Gobi Wireless Modem (QDL mode)
+```

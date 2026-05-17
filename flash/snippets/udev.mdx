@@ -1,0 +1,16 @@
+The host system must have the correct `udev` rules configured to allow proper USB
+device access. This step is only required when setting up a new host environment or
+when encountering permission issues while detecting the device over USB.
+
+- Run the following command to configure the `udev` USB rules for the
+  Qualcomm manufacturing vendor ID **05c6** on the Linux host
+  ```bash
+  sudo echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="05c6", ATTRS{idProduct}=="9008", MODE="0666", GROUP="plugdev"' >> /etc/udev/rules.d/51-qcom-usb.rules
+  ```
+
+- Restart the `udev` service for the changes to take effect
+   ```bash
+   sudo systemctl restart udev
+   ```
+
+- If the USB cable is already connected to the host, unplug and reconnect it for the updated rules to take effect.

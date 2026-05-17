@@ -1,0 +1,27 @@
+- Set up the Yocto build environment using the helper script. This script expects
+  kas configuration files to be passed as parameters and converts these kas
+  configuration files into the `auto.conf` and `bblayers.conf` configuration
+  required by BitBake
+
+  <CodeGroup>
+  ```bash IQ-9075-EVK
+  source setup-environment --machine meta-qcom/ci/iq-9075-evk.yml --distro meta-qcom/ci/qcom-distro.yml
+  ```
+
+  ```bash IQ-8275-EVK
+  source setup-environment --machine meta-qcom/ci/iq-8275-evk.yml --distro meta-qcom/ci/qcom-distro.yml
+  ```
+
+  ```bash IQ-615-EVK
+  source setup-environment --machine meta-qcom/ci/iq-615-evk.yml --distro meta-qcom/ci/qcom-distro.yml
+  ```
+
+  ```bash QCS6490
+  source setup-environment --machine meta-qcom/ci/rb3gen2-core-kit.yml --distro meta-qcom/ci/qcom-distro.yml
+  ```
+  </CodeGroup>
+
+- Build the image by invoking BitBake
+  ```bash
+  bitbake qcom-multimedia-proprietary-image
+  ```

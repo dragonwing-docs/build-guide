@@ -1,0 +1,22 @@
+- Build the software image using `kas`. You define build targets based
+  on machine and distro combinations.
+
+    <CodeGroup>
+
+    ```bash IQ-9075-EVK
+    kas build meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml
+    ```
+
+    ```bash IQ-8275-EVK
+    kas build meta-qcom/ci/iq-8275-evk.yml:meta-qcom/ci/qcom-distro.yml
+    ```
+
+    ```bash IQ-615-EVK
+    kas build meta-qcom/ci/iq-615-evk.yml:meta-qcom/ci/qcom-distro.yml
+    ```
+
+    ```bash QCS6490
+    kas build meta-qcom/ci/rb3gen2-core-kit.yml:meta-qcom/ci/qcom-distro.yml
+    ```
+
+    </CodeGroup>

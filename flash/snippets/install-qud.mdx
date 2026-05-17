@@ -1,0 +1,18 @@
+QUD is required to ensure the host system can properly detect and
+communicate with the Qualcomm device over USB in Emergency Download
+(EDL) mode.
+
+- Clone the `qud` GitHub repository
+  ```bash
+  git clone https://github.com/quic/quic-usb-drivers.git
+  ```
+
+- Make sure the install script is executable
+  ```bash
+  chmod +x quic-usb-drivers/QcDevDriver.sh
+  ```
+
+- Install the QUD driver
+  ```bash
+  sudo ./quic-usb-drivers/QcDevDriver.sh install
+  ```

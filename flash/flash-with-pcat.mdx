@@ -1,0 +1,49 @@
+---
+title: "Flashing with PCAT"
+---
+
+import InstallQscCli from "./snippets/install-qsc-cli.mdx"
+import InstallPCAT from "./snippets/install-pcat.mdx"
+import UnpackImage from "./snippets/unpack-image.mdx"
+import Storage from "./snippets/storage-type.mdx"
+import Edl from "./snippets/edl.mdx"
+import Cdt from "./snippets/cdt.mdx"
+import FlashPCAT from "./snippets/flash-pcat.mdx"
+
+## Introduction
+This document covers flashing using PCAT, an alternative to QDL that provides a more
+integrated and user-friendly flashing experience. It is primarily intended for registered
+users who have access to Qualcomm’s partner tools.
+
+To flash a prebuilt image using PCAT, the following steps are required
+
+- Install the packages required for flashing the image - [Install Required Packages](#install-required-packages)
+- Obtain a flashable image - [Obtain Flashable Image](#obtain-flashable-image)
+- Identify the correct storage configuration for your device - [Identify Storage Configuration](#identify-storage-configuration)
+- Select the appropriate CDT based on the reference kit - [Configure CDT](#configure-cdt)
+- Switch the device into Emergency Download (EDL) mode - [Switch device to EDL Mode](#switch-device-to-edl-mode)
+- Flash the software using PCAT - [Flash software image](#flash-software-image)
+
+## Install Required Packages
+
+<InstallQscCli />
+<InstallPCAT />
+
+## Obtain Flashable Image
+<UnpackImage />
+
+## Identify Storage Configuration
+<Storage />
+
+## Configure CDT
+<Cdt />
+
+## Switch device to EDL Mode
+<Edl />
+
+## Flash software image
+<FlashPCAT />
+
+## Related Topics
+- [How to switch to EDL mode using UART?](./how-to-trigger-edl-with-uart)
+- [How to switch to EDL mode using ADB?](./how-to-trigger-edl-with-adb)

@@ -1,0 +1,17 @@
+<Note>
+Safety Island (SAIL) is applicable only for the Qualcomm Dragonwing™ IQ-9075
+and the Qualcomm Dragonwing™ IQ-8275 development kits. If you’re not using one
+of these development kits, skip this section.
+</Note>
+
+- The SAIL artifacts are present under the `sail_nor` directory within the
+  unpacked qcomflash directory. Navigate to this path to run the remaining
+  commands in this section.
+  ```bash
+  cd sail_nor
+  ```
+
+- Flash the SAIL
+   ```bash
+   qdl --storage spinor prog_firehose_ddr.elf rawprogram0.xml patch0.xml
+   ```

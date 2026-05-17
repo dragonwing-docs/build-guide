@@ -1,0 +1,41 @@
+---
+title: Switch to EDL mode using ADB
+---
+
+import InstallADB from "./snippets/install-adb.mdx"
+import ConnectADB from "./snippets/connect-adb.mdx"
+import InstallQUD from "./snippets/install-qud.mdx"
+
+## Introduction
+
+This document describes an alternative method to switch devices into
+EDL mode using ADB. This method is only applicable if the device has
+a preloaded image.
+
+At a high level, the workflow includes
+
+- Set up the host system with required tools (QUD, ADB)
+- Connect device to ADB
+- Switch device to EDL mode
+
+## Install Required Packages
+<InstallQUD />
+<InstallADB />
+
+## Connect to ADB
+<ConnectADB />
+
+## Switch device to EDL mode
+- In the `adb` shell, switch the device to EDL mode
+   ```bash
+   reboot edl
+   ```
+
+- Verify if the device is in EDL mode
+   ```bash
+   lsusb
+   ```
+
+   ```text Sample output
+   Bus 002 Device 014: ID 05c6:9008 Qualcomm, Inc. Gobi Wireless Modem (QDL mode)
+   ```

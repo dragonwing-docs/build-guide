@@ -1,0 +1,337 @@
+---
+title: "How to"
+---
+
+## **Sync**
+
+### **Set up shared sstate and downloads cache**
+
+You can use the `sstate-cache` and `downloads` directories to reuse the previously built artifacts and accelerate later builds. By default, BitBake creates these directories inside the build directory. You can configure shared `sstate-cache` and `downloads` directories to reuse the same cache across multiple workspaces.
+
+```text
+# export these variables before running the build
+export DL_DIR="/path/to/shared/downloads"
+export SSTATE_DIR="/path/to/shared/sstate"
+
+kas build meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/linux-qcom-6.18.yml:meta-qcom/ci/lock.yml
+
+# Example, kas build meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/linux-qcom-6.18.yml:meta-qcom/ci/lock.yml
+```
+
+## **Build**
+### **Set storage**
+
+The machine configurations have either UFS or EMMC storage enabled by default. UFS storage is enabled by default for QCS6490, IQ-9075 EVK, and IQ-8275 EVK. EMMC storage is enabled by default for IQ-615 EVK. To change the default storage, follow these commands:
+
+```text
+cd meta-qcom/conf/machine
+
+# check the machine configuration to figure out which storage is currently enabled
+cat <machine>.conf | grep "QCOM_PARTITION_FILES_SUBDIR"
+
+# Update QCOM_PARTITION_FILES_SUBDIR to set the correct storage
+# Example,
+# QCOM_PARTITION_FILES_SUBDIR ?= "partitions/iq-615-evk/emmc"
+# QCOM_PARTITION_FILES_SUBDIR ?= "partitions/iq-615-evk/ufs"
+```
+
+### **Increase swap space**
+
+If the build fails because of an out-of-memory (OOM) error, increase the swap space to more than 32 GB. Run the following commands to enlarge the swap area:
+
+```text
+<commands>
+```
+
+```text
+sudo su root
+swapon --show
+swapoff /swapfile
+fallocate -l 64G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+free -h
+```
+
+### **Modify recipe**
+
+Modify and compile a recipe from the same workspace:
+
+```text
+# You can use devtool to modify the source-code used in any of the recipes
+kas shell -c "devtool modify <recipe>" meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/lock.yml
+# Example, kas shell -c "devtool modify linux-qcom" meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/lock.yml
+
+# Build your recipe
+kas shell -c "bitbake <recipe>" meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/lock.yml
+# Example, kas shell -c "bitbake linux-qcom" meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/lock.yml
+```
+
+### **Generate an SDK**
+
+Set up the environment and generate SDK from the same workspace:
+
+```text
+kas shell -c "bitbake -c do_populate_sdk <image>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
+```
+
+When the SDK generation is complete, you can see the images in the `<workspace-dir>/build/tmp/deploy/sdk` directory.
+
+### **Generate an eSDK**
+
+Set up the environment and generate eSDK from the same workspace:
+
+```text
+kas shell -c "bitbake -c do_populate_sdk_ext <image>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
+```
+
+When the eSDK generation is complete, you can see the images in the `<workspace-dir>/build/tmp/deploy/sdk` directory.
+
+### **Clean build artifacts**
+
+1. Clean the build artifacts:
+   ```text
+   kas shell -c "bitbake -fc do_cleansstate <recipe>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
+   ```
+2. Rebuild the recipe after cleaning up the artifacts:
+   ```text
+   kas shell -c "bitbake <recipe>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
+   ```
+
+### **Build a standalone QDL**
+
+**Prerequisites**
+
+- The modules `make` and `gcc` must be available.
+- Install the following dependent packages:
+  ```text
+  sudo apt-get install git libxml2-dev libusb-1.0-0-dev pkg-config
+  ```
+
+**Steps to build QDL**
+
+1. Download and compile the Linux flashing tool (QDL):
+   ```text
+   mkdir <qdl_download_path>
+   git clone --branch master https://github.com/linux-msm/qdl
+   cd qdl
+   make
+   ```
+
+### **Change the Hexagon tool install path**
+
+The `HEXAGON_ROOT` environment variable must point to the path where the Hexagon tools are installed. By default, the `qsc-cli` tool installs a `HEXAGON_ROOT` variable in the `$HOME` directory. You can also choose an alternate installation directory.
+
+Use the `––path` option in `qsc-cli` command to install Hexagon tools in a directory of your choice and export the `HEXAGON_ROOT` variable to the same directory.
+
+Provide an absolute path for `<TOOLS_DIR>` in `qsc-cli` and export commands as shown in the following example:
+
+```text
+# Example
+
+mkdir -p <TOOLS_DIR>
+qsc-cli tool extract --name hexagon8.4 --required-version 8.4.07 --path <TOOLS_DIR>/8.4.07
+export HEXAGON_ROOT=<TOOLS_DIR>
+```
+
+### **Connect to the network**
+
+**Set up Wi-Fi**
+
+Wi-Fi is operational in Station mode. The Wi-Fi host driver and the authentication for network management are initialized during the device boot up.
+
+1. Connect to the Wireless Access Point (Wi-Fi Router):
+   ```text
+   nmcli dev wifi connect <WiFi-SSID> password <WiFi-password>
+   ```
+   **Example**
+   ```text
+   root@iq-9075-evk:~# nmcli dev wifi connect Hydra password 1234567890
+   ```
+2. Check the connection and device status:
+   ```text
+   nmcli -p device
+   ```
+   <div className="flex flex-col items-center gap-2">
+     <img src="./media/k2c-qli-build-ga/status_of_devices.png" alt="status_of_devices" />
+   </div>
+3. Check the WLAN connection status and IP address:
+   ```text
+   ip address show wlp1s0
+   ```
+   <div className="flex flex-col items-center gap-2">
+     <img src="./media/k2c-qli-build-ga/chk_ip.png" alt="chk_ip" />
+   </div>
+4. Ensure that the connection is active by pinging any website:
+   ```text
+   ping google.com
+   ```
+
+**Switching networks**
+
+If you are already connected to a network and need to reconnect to another network, do the following:
+
+1. Disconnect from the current network:
+   ```text
+   nmcli c down Hydra
+   ```
+   Connection ‘Hydra’ successfully deactivated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/1)
+2. Check the disconnect status:
+   ```text
+   nmcli -p device
+   ```
+   <div className="flex flex-col items-center gap-2">
+     <img src="./media/k2c-qli-build-ga/status_of_devices_switch_network.png" alt="status_of_devices_switch_network" />
+   </div>
+3. Connect to a different Wi-Fi network:
+   ```text
+   nmcli dev wifi connect QualcommAP password XXXXXXXXX
+   ```
+4. Check the connection status:
+   ```text
+   nmcli -p device
+   ```
+
+**Sign in using SSH**
+
+Establish the [network connectivity](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#connect-to-network) before connecting to SSH.
+
+1. Locate the IP address of the device according to the type of network connection, using the UART console on the Linux host: For Ethernet:
+   ```text
+   ip address show eth2
+   ```
+   For Wi-Fi:
+   ```text
+   ip address show wlp1s0
+   ```
+2. Use the IP address from the Linux host to establish an SSH connection to the device:
+   ```text
+   ssh root@ip-address
+   ```
+   **Example** `ssh root@192.168.0.222`
+3. Connect to the SSH shell using the following password:
+   ```text
+   oelinux123
+   ```
+
+<Note>
+  **Note**
+
+  - Connect the remote host to the same Wi-Fi access point as the device.
+  - To create a non-root user account, see [Create a non-root user account](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-251/faqs.html#non-root-acc).
+</Note>
+
+### **Configure Ethernet with RJ45 port**
+
+Ethernet/RJ45 port is enabled as a downstream port of PCIe to USB controller (`renesas`). Ensure that the `renesas_usb_fw.mem` file is available at the `var/usbfw` directory.
+
+<Note>
+  **Note**
+
+  - If the `renesas_usb_fw.mem` firmware isn’t available at the `var/usbfw` directory, then [update USB and Ethernet controller firmware](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#update-usb-eth-controller).
+</Note>
+
+To check if the USB to Ethernet controller is enumerated, run the following command:
+
+```text
+lsusb
+```
+
+**Sample output**:
+
+```text
+Bus 002 Device 003: ID 0b95:1790 ASIX Electronics Corp. AX88179 Gigabit Ethernet
+Bus 002 Device 002: ID 05e3:0625 Genesys Logic, Inc. USB3.2 Hub
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 001 Device 002: ID 05e3:0610 Genesys Logic, Inc. Hub
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+```
+
+Connect an RJ45 cable to the device.
+
+To check the Ethernet IP address, run the following command:
+
+```text
+ip address
+```
+
+**Sample output**:
+
+<Note>
+  **Note**
+
+  10.219.0.106 is the IP address.
+</Note>
+
+```text
+enP1p4s0u1u1 Link encap:Ethernet HWaddr A6:CD:9B:FD:C1:B5
+
+inet addr:10.219.0.106  Bcast:10.219.1.255  Mask:255.255.254.0
+inet6 addr: fe80::a370:7a00:8131:5a03/64 Scope:Link
+UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+RX packets:1071 errors:0 dropped:0 overruns:0 frame:0
+TX packets:132 errors:0 dropped:0 overruns:0 carrier:0
+collisions:0 txqueuelen:1000
+RX bytes:60711 (59.2 KiB)  TX bytes:18342 (17.9 KiB)
+```
+
+### **Update USB and Ethernet controller firmware**
+
+If you face USB or Ethernet connectivity issues on the device, consider updating the firmware for the USB controller.
+
+**Prerequisites**
+
+- Upgrade the software as described in [Update the software](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-251/upgrade-rb3gen2-software.html) before updating the Renesas firmware.
+- Connect the device to the Linux host through the USB Type-C cable.
+
+<Note>
+  **Note**
+
+  The following procedure is applicable only to Ubuntu 22.04 host. If you are using a Windows or macOS host, set up an Ubuntu virtual machine by following the instructions described in the [Virtual Machine Setup Guide](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-41/getting-started.html).
+</Note>
+
+**Update the firmware**
+
+1. Register and sign in to [Renesas](https://www.renesas.com/).
+2. [Download the firmware](https://www.renesas.com/en/products/interface/usb-switches-hubs/upd720201-usb-30-host-controller#design_development).
+3. Create the `usb_fw.img` image and copy the USB firmware:
+   ```text
+   dd if=/dev/zero of=usb_fw.img bs=4k count=240
+   mkfs -t ext4 usb_fw.img
+   mkdir usb_fw
+   sudo mount -o loop usb_fw.img usb_fw/
+   sudo cp -rf renesas_usb_fw.mem usb_fw
+   sudo umount usb_fw
+   ```
+4. Start the device in Fastboot mode:
+   ```text
+   adb root
+   adb shell
+   reboot bootloader
+   ```
+5. Check if the device is in Fastboot mode:
+   ```text
+   fastboot devices
+   ```
+   7dc85f5e fastboot
+6. Flash the `usb_fw.img` image to the device:
+   ```text
+   fastboot erase usb_fw
+   fastboot flash usb_fw usb_fw.img
+   fastboot reboot
+   ```
+   c:\>fastboot erase usb\_fw\
+   Erasing ‘usb\_fw’ FAILED (remote: ‘Check device console.’)\
+   fastboot: error: Command failed
+7. Verify if the firmware is successfully updated:
+   ```text
+   dmesg
+   ```
+   ```text
+   Sample log after the firmware is successfully updated. [    6.589462] usbcore: registered new device driver onboard-usb-hub
+   [    6.653277] usb 2-1: new SuperSpeed USB device number 2 using xhci_hcd
+   [    7.013061] usb 2-1.1: new SuperSpeed USB device number 3 using xhci_hcd
+   [    7.120657] ax88179_178a 2-1.1:1.0 eth0: register ‘ax88179_178a’ at usb-0001:04:00.0-1.1, ASIX AX88179 USB 3.0 Gigabit Ethernet, 3e:9e:5e:ff:d3:fb
+   [    7.120767] usbcore: registered new interface driver ax88179_178a
+   ```

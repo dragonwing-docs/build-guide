@@ -1,0 +1,18 @@
+ADB is used to communicate with a running device and is required to trigger a reboot
+into EDL mode from the operating system. It provides a convenient way to transition
+the device into the correct state for flashing without manual intervention.
+
+- Install `adb` on your host system using the system package manager
+  ```bash
+  sudo apt install android-tools-adb android-tools-fastboot
+  ```
+
+- Verify if `adb` is installed on your system
+  ```bash
+  adb --version
+  ```
+
+  ```text Sample output
+  Android Debug Bridge version 1.0.39
+  Version 1:8.1.0+r23-5ubuntu2
+  ```
