@@ -1,0 +1,47 @@
+QDL is a software utility used to communicate with Qualcomm USB
+devices in Emergency Download (EDL) mode, enabling you to upload
+a flash loader and program software images onto the device. Follow
+these steps to download and setup QDL on your system.
+
+- Download the QDL binary from the
+  [Qualcomm Software Center](https://softwarecenter.qualcomm.com/#/catalog/item/Qualcomm_Device_Loader)
+
+    <CodeGroup>
+
+    ```bash Linux x64
+    wget https://softwarecenter.qualcomm.com/api/download/software/tools/Qualcomm_Device_Loader/Linux/Debian/latest.zip -O qdl.zip
+    ```
+
+    ```bash Linux ARM
+    wget https://softwarecenter.qualcomm.com/api/download/software/tools/Qualcomm_Device_Loader/Linux/ARM64/Debian/latest.zip -O qdl.zip
+    ```
+
+    ```bash MacOS
+    wget https://softwarecenter.qualcomm.com/api/download/software/tools/Qualcomm_Device_Loader/macOS/ARM64/latest.zip -O qdl.zip
+    ```
+
+    </CodeGroup>
+
+- Unzip the downloaded archive
+
+    ```bash
+    unzip qdl.zip
+    ```
+
+- Provide execute permission to the QDL binary
+
+    ```bash
+    chmod +x <unzipped-qdl-directory>/qdl
+    ```
+
+- Add the QDL executable to your system PATH
+
+    ```bash
+    export PATH="$PATH:<unzipped-qdl-directory>"
+    ```
+
+- Verify that the QDL executable is accessible
+
+    ```bash
+    qdl --version
+    ```

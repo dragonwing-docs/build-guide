@@ -1,0 +1,31 @@
+---
+title: Yocto Build with Repo Manifest
+---
+
+import HostSetup from "./snippets/host-setup-repo.mdx";
+import SyncInstructions from "./snippets/sync-meta-qcom-repo.mdx";
+import BuildInstructions from "./snippets/build-meta-qcom-repo.mdx";
+import ValidateInstructions from "./snippets/validate-build-artifacts.mdx";
+
+This section covers how to sync and build the meta-qcom release snapshot using
+the [repo](https://source.android.com/docs/setup/reference/repo) tool. Although
+Qualcomm recommends the `kas` tool as the preferred method for building and
+consuming meta‑qcom, this workflow is retained for legacy users who are already
+familiar with it and need to continue supporting or maintaining existing setups.
+
+As part of this guide, you'll
+- Install additional packages required for this workflow
+- Sync the meta layers required for the build using `repo` tool
+- Use the helper script to translate the kas configuration files into
+  BitBake configuration files and setup the environment
+- Execute a Yocto build using native BitBake commands
+
+## Host Setup
+
+<HostSetup />
+
+## Build Instructions
+
+<SyncInstructions />
+<BuildInstructions />
+<ValidateInstructions />

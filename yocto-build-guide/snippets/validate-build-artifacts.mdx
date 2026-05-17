@@ -1,0 +1,25 @@
+-  The build creates a single tarball containing all the relevant files to
+   perform a full clean flash, including partition metadata, boot firmware,
+   ESP partition and the rootfs. After a successful build, check if the
+   qcomflash tarball exists in the build artifacts. The following examples
+   use `qcom-multimedia-proprietary-image` as the image name.
+
+   <CodeGroup>
+
+   ```bash IQ-9075-EVK
+   ls build/tmp/deploy/images/iq-9075-evk/qcom-multimedia-proprietary-image-iq-9075-evk.rootfs.qcomflash.tar.gz
+   ```
+
+   ```bash IQ-8275-EVK
+   ls build/tmp/deploy/images/iq-8275-evk/qcom-multimedia-proprietary-image-iq-8275-evk.rootfs.qcomflash.tar.gz
+   ```
+
+   ```bash IQ-615-EVK
+   ls build/tmp/deploy/images/iq-615-evk/qcom-multimedia-proprietary-image-iq-615-evk.rootfs.qcomflash.tar.gz
+   ```
+
+   ```bash QCS6490
+   ls build/tmp/deploy/images/rb3gen2-core-kit/qcom-multimedia-proprietary-image-rb3gen2-core-kit.rootfs.qcomflash.tar.gz
+   ```
+
+   </CodeGroup>

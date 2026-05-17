@@ -1,0 +1,54 @@
+---
+title: "BSP Image Build with QSC CLI"
+---
+
+import InstallQscCli from "../flash/snippets/install-qsc-cli.mdx"
+
+## Introduction
+
+This document provides instructions for syncing, building, and flashing images
+using the `qsc-cli` tool. It is intended for registered users who have access
+to Qualcomm’s proprietary resources. The qsc-cli tool streamlines the workflow
+by providing a unified interface that runs tasks in containerized environments,
+ensuring simplicity, consistency, and reproducibility.
+
+At a high level, this document covers
+- Setting up and authenticating `qsc-cli` - [Install QSC-CLI](#install-qsc-cli)
+- Syncing required sources and dependencies using `qsc-cli` - [Download the software](#download-the-software)
+- Building Qualcomm images using `qsc-cli` - [Build the default configuration](#build-the-default-configuration)
+
+## Install QSC-CLI
+
+<InstallQscCli />
+
+## Download the software
+
+- Download a software release using `qsc-cli`. The values for the parameters
+  `--product`, `--distribution`, and `--release` are documented
+  in the [Release Notes]().
+
+  ```bash
+  qsc-cli chip-software download --workspace-path '<absolute-workspace-path>' --product '<product-id>' --distribution '<distribution>' --release '<release-id>'
+  ```
+
+## Build the default configuration
+
+### Compile
+
+For information on the default configurations, see the table _Default values of Machine parameters for QSC CLI_ in the [Release Notes](https://docs.qualcomm.com/doc/80-80021-300/).
+
+When the download is complete, start the compilation process. Depending on the size of the software and the host computer configuration, the compilation process can take a few hours.
+
+```bash
+qsc-cli chip-software compile --workspace-path '<absolute-workspace-path>'
+```
+
+This process builds the necessary Qualcomm firmware and completes the Qualcomm Linux build.
+
+### Recompile
+
+To recompile individual software images after any modifications to the software release, use your existing workspace built using QSC CLI:
+
+```bash
+qsc-cli chip-software compile --image '<software-image-name>' --workspace-path '<absolute-workspace-path>'
+```

@@ -1,0 +1,42 @@
+- The following packages are additionally required for firmware compilation
+   ```bash
+   sudo apt-get install lib32stdc++6 libncurses5 checkinstall libreadline-dev \
+        libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev \
+        libbz2-dev libffi-dev curl
+   ```
+
+- Use `qsc-cli` to obtain the PAT token for Chipcode access. Note that this
+  token expires in two weeks.
+   ```bash
+   qsc-cli show-access-token
+   ```
+
+   ```text Sample output
+   user@hostname:/local/mnt/workspace$ qsc-cli show-access-token
+   [Info]: Starting qsc-cli version 0.0.0.9
+   5LThNlklb55mMVLB5C2KqUGU2jCF
+   ```
+
+- Add the following entries to your `~/.netrc` file for authenticating access
+  to chipcode repositories.
+   ```text
+   machine chipmaster2.qti.qualcomm.com
+   login <login-id>
+   password <access-token>
+
+   machine qpm-git.qualcomm.com
+   login <login-id>
+   password <access-token>
+   ```
+
+- Update git configurations
+   ```bash
+   # Add the following git configurations to fetch large size repositories and to avoid unreliable connections
+   git config --global http.postBuffer 1048576000
+   git config --global http.maxRequestBuffer 1048576000
+   git config --global http.lowSpeedLimit 0
+   git config --global http.lowSpeedTime 999999
+   # Add the following git configurations to follow remote redirects from http-alternates files or alternates
+   git config --global http.https://chipmaster2.qti.qualcomm.com.followRedirects true
+   git config --global http.https://qpm-git.qualcomm.com.followRedirects true
+   ```

@@ -1,0 +1,27 @@
+`qsc-cli` is a command-line tool provided by Qualcomm that offers an end-to-end workflow
+for accessing, managing, and building Qualcomm software. Follow these steps to install
+`qsc-cli` on your system
+
+- Register your Qualcomm email ID by visiting the [Qualcomm Support Page](https://www.qualcomm.com/support/working-with-qualcomm)
+
+- Download the Debian package for `qsc-cli`
+    <CodeGroup>
+   ```bash x86
+   wget ttps://softwarecenter.qualcomm.com/api/download/software/tools/Qualcomm_Software_Center/Linux/Debian/latest.deb -O qsc_installer.deb
+   ```
+
+   ```bash ARM64
+   wget https://softwarecenter.qualcomm.com/api/download/software/tools/Qualcomm_Software_Center/Linux/ARM64/Debian/latest.deb -O qsc_installer.deb
+   ```
+   </CodeGroup>
+
+- Install the `qsc-cli` Debian package:
+   ```bash
+   sudo apt update
+   sudo apt install ./qsc_installer.deb
+   ```
+
+- Sign in to `qsc-cli` using your registered email ID
+   ```bash
+   qsc-cli login -u <username>
+   ```

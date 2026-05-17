@@ -1,0 +1,62 @@
+---
+title: "Flash software images"
+---
+
+import InstallQdl from "./snippets/install-qdl.mdx"
+import UnpackImage from "./snippets/unpack-image.mdx"
+import Storage from "./snippets/storage-type.mdx"
+import Udev from "./snippets/udev.mdx"
+import Edl from "./snippets/edl.mdx"
+import Ufs from "./snippets/ufs.mdx"
+import Sail from "./snippets/sail.mdx"
+import Cdt from "./snippets/cdt.mdx"
+import FlashQdl from "./snippets/flash-qdl.mdx"
+import References from "./snippets/references.mdx"
+
+## Introduction
+This document provides the instructions needed to flash a prebuilt image onto a device.
+While Qualcomm hardware typically comes with a preloaded image, this guide is intended
+for users who want to update to a newer software version or deploy images built from source.
+
+To flash a prebuilt image, the following steps are required
+
+- Download the packages required for flashing the image - [Download Required Packages](#download-required-packages)
+- Obtain Flashable Image - [Obtain Flashable Image](#obtain-flashable-image)
+- Identify storage configuration for your device - [Identify Storage Configuration](#identify-storage-configuration)
+- Update the udev rules on the host system - [Configure udev rules](#configure-udev-rules)
+- Select the appropriate CDT based on the reference kit - [Configure CDT](#configure-cdt)
+- Switch device to EDL mode - [Switch device to EDL Mode](#switch-device-to-edl-mode)
+- Provision UFS - [Provision UFS](#provision-ufs)
+- Flash SAIL - [Flash SAIL](#flash-sail)
+- Flash software image - [Flash software image](#flash-software-image)
+
+## Download Required Packages
+<InstallQdl />
+
+## Obtain Flashable Image
+<UnpackImage />
+
+## Identify Storage Configuration
+<Storage />
+
+## Configure udev rules
+<Udev />
+
+## Configure CDT
+<Cdt />
+
+## Switch device to EDL mode
+<Edl />
+
+## Provision UFS
+<Ufs />
+
+## Flash SAIL
+<Sail />
+
+## Flash software image
+<FlashQdl />
+
+## Related Topics
+- [How to switch to EDL mode using UART?](./how-to-trigger-edl-with-uart)
+- [How to switch to EDL mode using ADB?](./how-to-trigger-edl-with-adb)

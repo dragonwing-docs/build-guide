@@ -1,0 +1,39 @@
+---
+title: Switch to EDL mode using UART
+---
+
+import InstallUART from "./snippets/install-uart.mdx"
+import ConnectUART from "./snippets/connect-uart.mdx"
+
+## Introduction
+
+This document describes an alternative method to switch devices into EDL mode
+using UART. This method is only applicable if the device has a preloaded build.
+
+At a high level, the workflow includes
+
+- Set up the host system with the required tools (UART console access)
+- Establish a UART connection to the device
+- Trigger the device to enter EDL mode using UART commands
+
+## Install Required Packages
+<InstallUART />
+
+## Connect to a UART Shell
+<ConnectUART />
+
+## Switch device to EDL mode
+
+- In the UART shell, move the device into EDL mode:
+   ```bash
+   reboot edl
+   ```
+
+- Verify if the device is in EDL mode
+   ```bash
+   lsusb
+   ```
+
+   ```text Sample output
+   Bus 002 Device 014: ID 05c6:9008 Qualcomm, Inc. Gobi Wireless Modem (QDL mode)
+   ```

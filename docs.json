@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Build Guide",
+  "name": "Docs",
   "theme": "mint",
   "colors": {
     "primary": "#3253DC",
@@ -8,20 +8,29 @@
     "dark": "#1A3AB8"
   },
   "navigation": {
-    "groups": [
-      		{
-                "group": "Build Guide",
-                "pages": [
-                  "build-guide",
-                  "build-overview",
-                  "build-from-source",
-                  "build-from-source-with-firmware-and-devtool",
-                  "build-with-qsc-cli",
-                  "flash-software-images",
-                  "troubleshoot",
-                  "how-to"
-    		]
+    "tabs": [
+      {
+        "tab": "Software",
+        "groups": [
+          {
+            "group": "Quickstart Guide",
+            "pages": ["flash/flash-with-qdl"]
+          },
+          {
+            "group": "Yocto Guide",
+            "pages": ["yocto-build-guide/build-guide"]
+          },
+          {
+            "group": "Advanced Guide",
+            "pages": [
+              "advanced-section/build-firmware",
+              "flash/flash-with-pcat",
+              "advanced-section/build-with-qsc-cli",
+              "flash/flash-with-qsc-cli"
+            ]
           }
         ]
       }
+    ]
+  }
 }

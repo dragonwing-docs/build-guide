@@ -1,0 +1,66 @@
+---
+title: "BSP Image Build with firmware"
+---
+
+import HostRequirements from "../yocto-build-guide/snippets/host-requirements.mdx"
+import InstallQscCli from "../flash/snippets/install-qsc-cli.mdx"
+import HostSetup from "../yocto-build-guide/snippets/host-setup.mdx"
+
+import Firmware6490 from "./snippets/firmware-qcs6490.mdx"
+import Firmware9075 from "./snippets/firmware-iq-9075.mdx"
+import Firmware8275 from "./snippets/firmware-iq-8275.mdx"
+import Firmware615 from "./snippets/firmware-iq-615.mdx"
+
+import FirmwareHostSetup from "./snippets/firmware-host-setup.mdx"
+import SyncFirmware from "./snippets/sync-firmware.mdx"
+
+import SyncInstructions from "../yocto-build-guide/snippets/sync-meta-qcom-extras-release.mdx"
+import BuildInstructions from "../yocto-build-guide/snippets/build-meta-qcom-extras.mdx"
+import ValidateInstructions from "../yocto-build-guide/snippets/validate-build-artifacts.mdx"
+
+## Introduction
+
+This section provides a high-level overview of how to build firmware
+components from source and integrate them into the Qualcomm BSP image.
+It is intended for registered users with the appropriate licenses, as
+access to firmware sources is restricted.
+
+At a high level, this document explains how to
+- Setup the host system and install the required packages - [Host Setup](#host-setup)
+- Download the firmware sources from Chipcode - [Sync Firmware Sources](#sync-firmware-sources)
+- Compile the firmware sources - [Build Firmware](#build-firmware)
+- Include firmware sources in BSP image build - [Build BSP Image](#build-bsp-image)
+
+## Host System Requirements
+<HostRequirements />
+
+## Install QSC-CLI
+<InstallQscCli />
+
+## Host Setup
+<HostSetup />
+<FirmwareHostSetup />
+
+## Sync Firmware Sources
+<SyncFirmware />
+
+## Build Firmware
+<Tabs>
+  <Tab title="QCM6490/QCS5430">
+    <Firmware6490 />
+  </Tab>
+  <Tab title="IQ-9075">
+    <Firmware9075 />
+  </Tab>
+  <Tab title="IQ-8275">
+    <Firmware8275 />
+  </Tab>
+  <Tab title="IQ-615">
+    <Firmware615 />
+  </Tab>
+</Tabs>
+
+### Build BSP Image
+<SyncInstructions />
+<BuildInstructions />
+<ValidateInstructions />

@@ -1,0 +1,54 @@
+---
+title: Flashing with QSC CLI
+---
+
+import InstallQscCli from "./snippets/install-qsc-cli.mdx"
+import InstallPcat from "./snippets/install-pcat.mdx"
+import Cdt from "./snippets/cdt.mdx"
+import Edl from "./snippets/edl.mdx"
+import Ufs from "./snippets/ufs.mdx"
+import Sail from "./snippets/sail.mdx"
+
+#### Introduction
+This document describes how to flash images using the qsc-cli tool. It is intended
+only for registered users with the appropriate access. This method specifically
+supports flashing images that are generated as part of the qsc-cli build process.
+
+#### Install Required Packages
+<InstallQscCli />
+<InstallPcat />
+
+#### Configure CDT
+<Cdt />
+
+#### Switch device to EDL mode
+<Edl />
+
+#### Provision UFS
+<Ufs />
+
+#### Flash SAIL
+<Sail />
+
+#### Flash a software image
+
+- Identify the `--serialnumber` parameter for your device
+  ```bash
+  pcat -devices
+  ```
+
+  ```text Sample output
+  Searching devices in Device Manager, please wait for a moment…
+  ID | DEVICE TYPE | DEVICE STATE | SERIAL NUMBER | ADB SERIAL NUMBER | DESCRIPTION
+  NA | NA          | EDL          | BE116704      | be116704          | Qualcomm USB Composite Device:QUSB_BULK_CID:042F_SN:BE116704
+  ```
+
+- Identify the `--buildflavor` for the image to be flashed. To list the build flavors, run the following command on the host computer
+  ```bash
+  qsc-cli chip-software flash --workspace-path "<absolute-workspace-path>" --list-buildflavor
+  ```
+
+- Flash the image
+  ```bash
+  qsc-cli chip-software flash --workspace-path "<absolute-workspace-path>" --buildflavor "<build-flavor>" --serialnumber "<serial-number>"
+  ```

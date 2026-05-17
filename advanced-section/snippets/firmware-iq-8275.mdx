@@ -1,0 +1,211 @@
+**Prerequisites**
+
+- Ensure that the working shell is `bash`.
+  ```bash
+  echo $0
+  ```
+
+  The expected output of the command should be `bash`. If not, enter the bash shell
+  ```bash
+  bash
+  ```
+
+- Install the libffi6 package using the following commands. This is required for the QAIC compiler, which generates the header and the source files from the IDL files
+  ```bash
+  curl -LO http://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi6_3.2.1-8_amd64.deb
+  sudo dpkg -i libffi6_3.2.1-8_amd64.deb
+  ```
+
+- Install LLVM for AOP, Qualcomm TEE, and boot compilation
+  ```bash
+  cd <FIRMWARE_ROOT>
+  mkdir llvm
+  # Sign in to qsc-cli and activate the license
+  qsc-cli login
+  qsc-cli tool activate-license --name sdllvm_arm
+  # LLVM requirement for boot compilation is 14.0.4
+  qsc-cli tool install --name sdllvm_arm --required-version 14.0.4 --path <FIRMWARE_ROOT>/llvm/14.0.4
+  chmod -R 777 <FIRMWARE_ROOT>/llvm/14.0.4
+  # LLVM requirement for the Qualcomm TEE compilation is 16.0.7
+  qsc-cli tool install --name sdllvm_arm --required-version 16.0.7 --path <FIRMWARE_ROOT>/llvm/16.0.7
+  chmod -R 777 <FIRMWARE_ROOT>/llvm/16.0.7
+  ```
+
+- Export the `SECTOOLS` variable and compile the firmware builds (`<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem` is the top-level directory)
+  ```bash
+  export SECTOOLS=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux/sectools
+  export SECTOOLS_DIR=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux
+  ```
+
+- Install and set up Hexagon. Set the environment variable HEXAGON_ROOT to the
+  path where the Hexagon SDK is installed. To change the install path when using
+  `qsc-cli`, see [Change the Hexagon tool install path](#how-to-change-hexagon-path).
+  ```bash
+  qsc-cli tool extract --name hexagon8.6 --required-version 8.6.05.2
+  qsc-cli tool extract --name hexagon8.7 --required-version 8.7.02.1
+  export HEXAGON_ROOT=$HOME/Qualcomm/HEXAGON_Tools
+  echo $HEXAGON_ROOT
+  ```
+
+**Build DSP**
+
+**Tools required**
+
+- Compiler version: Hexagon 8.6.05.2 and 8.7.02.1
+- Python version: Python 3.8.2
+
+**Build steps**
+
+- Install the device tree compiler
+   ```bash
+   sudo apt-get install device-tree-compiler
+   export DTC_PATH=/usr/bin
+   ```
+
+- Install the dependencies
+   ```bash
+   pip install ruamel.yaml==0.17.17
+   pip install dtschema==2021.10
+   pip install jsonschema==4.0.0
+   ```
+
+- Go to the following directory
+   ```bash
+   cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/DSP.AT.1.0.1/dsp_proc/build/ms
+   ```
+
+- Clean the build
+   ```bash
+   python ./build_variant.py lemans.adsp.prod --clean
+   python ./build_variant.py monaco.cdsp0.prod --clean
+   python ./build_variant.py lemans.gpdsp0.prod --clean
+   ```
+
+- Build the image
+   ```bash
+   python ./build_variant.py lemans.adsp.prod && python ./build_variant.py monaco.cdsp0.prod && python ./build_variant.py lemans.gpdsp0.prod
+   ```
+
+**Build Boot**
+
+**Tools required**
+
+- Compiler version: LLVM version must be updated to 14.0.4
+  ```bash
+  export LLVM=<FIRMWARE_ROOT>/llvm/14.0.4/
+  ```
+- Python version: Python 3.10
+- libffi6 package
+
+**Build steps**
+
+- Install the device tree compiler
+   ```bash
+   sudo apt-get install device-tree-compiler
+   export DTC=/usr/bin
+   ```
+
+- Go to the following directory
+   ```bash
+   cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/BOOT.MXF.1.0.c1/
+   ```
+
+- Install the dependencies
+   ```bash
+   python -m pip install -r boot_images/boot_tools/dtschema_tools/oss/requirements.txt
+   pip install json-schema-for-humans
+   ```
+
+- Clean the build
+   ```bash
+   python -u boot_images/boot_tools/buildex.py -t monaco,QcomToolsPkg -v LAA -r RELEASE --build_flags=cleanall
+   ```
+
+- Build the image
+   ```bash
+   python -u boot_images/boot_tools/buildex.py -t monaco,QcomToolsPkg -v LAA -r RELEASE
+   ```
+
+   <Note>
+   For debug variant builds, replace `RELEASE` with `DEBUG`.
+   </Note>
+
+**Build Qualcomm TEE firmware**
+
+**Tools required**
+
+- Compiler version: LLVM 16.0.7
+- Python version: Python 3.10
+
+**Build steps**
+
+- Install LLVM
+   ```bash
+   cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+   vi build_config_deploy_monaco.xml
+   # Edit all the occurrences of /pkg/qct/software/llvm/release/arm/16.0.7/ to <FIRMWARE_ROOT>/llvm/16.0.7/
+   ```
+
+- Clean the build
+   ```bash
+   python build_all.py -b TZ.XF.5.0 CHIPSET=monaco --cfg=build_config_deploy_monaco.xml --clean
+   ```
+
+- Build the image
+   ```bash
+   cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+   python build_all.py -b TZ.XF.5.0 CHIPSET=monaco --cfg=build_config_deploy_monaco.xml
+   ```
+
+**Build AOP firmware**
+
+**Tools required**
+
+- Compiler version: LLVM 14.0.4
+- Python version: Python 3.10
+
+**Build steps**
+
+- Go to the following directory
+   ```bash
+   cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/AOP.HO.3.6.1/aop_proc/build/
+   ```
+
+- Clean the build
+   ```bash
+   ./build_monaco.sh -c -l <FIRMWARE_ROOT>/llvm/14.0.4/
+   ```
+
+- Build the image
+   ```bash
+   ./build_monaco.sh -l <FIRMWARE_ROOT>/llvm/14.0.4/
+   ```
+
+**CPUCP firmware**
+
+Qualcomm releases the CPUCP firmware as a binary and you don’t need to compile the build.
+
+**CPUSYS.VM firmware**
+
+Qualcomm releases the CPUSYS.VM firmware as a binary and you don’t need to compile the build.
+
+**BTFM firmware**
+
+Qualcomm releases the BTFM firmware as a binary and you don’t need to compile the build.
+
+**WLAN firmware**
+
+Qualcomm releases the WLAN firmware as a binary and you don’t need to compile the build.
+
+**Generate firmware prebuilts (boot-critical and split-firmware binaries)**
+
+- Create an integrated firmware binary from the individual components that you compiled
+  ```bash
+  cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/build
+  python build.py --imf
+  ```
+
+- Firmware prebuilt is successful if the following zip files are generated in the `<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/build/ufs/bin` directory
+  - `QCS8300_bootbinaries.zip`
+  - `QCS8300_dspso.zip`
+  - `QCS8300_fw.zip`

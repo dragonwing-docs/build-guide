@@ -1,0 +1,50 @@
+Universal flash storage (UFS) provisioning helps to divide the storage
+into many LUNs, which stores different types of data separately. This
+improves access efficiency and system organization.
+
+UFS is provisioned by default. If there are any changes in LUNs, UFS
+must be re-provisioned. To check if UFS needs to be re-provisioned,
+see the table *UFS Provision* in the [Release Specific Information]()
+document.
+
+- Download the provision file from Qualcomm's artifacts server
+    <CodeGroup>
+
+   ```bash IQ-9075-EVK
+   wget https://artifacts.codelinaro.org/artifactory/codelinaro-le/Qualcomm_Linux/QCS9100/provision.zip
+   ```
+
+   ```bash IQ-8275-EVK
+   wget https://artifacts.codelinaro.org/artifactory/codelinaro-le/Qualcomm_Linux/QCS8300/provision.zip
+   ```
+
+   ```bash QCS6490
+   wget https://artifacts.codelinaro.org/artifactory/codelinaro-le/Qualcomm_Linux/QCS6490/provision.zip
+   ```
+   </CodeGroup>
+
+- Unzip the downloaded archive
+   ```bash
+   unzip provision.zip -d provision
+   ```
+
+- Navigate to the extracted directory to run the remaining commands in this section
+   ```bash
+   cd provision
+   ```
+
+- Provision UFS
+    <CodeGroup>
+   ```bash IQ-9075-EVK
+   qdl --storage ufs prog_firehose_ddr.elf provision_1_2.xml
+   ```
+
+   ```bash IQ-8275-EVK
+   qdl --storage ufs prog_firehose_ddr.elf provision_1_3.xml
+   ```
+
+   ```bash QCS6490
+   qdl --storage ufs prog_firehose_ddr.elf provision_1_3.xml
+   ```
+   </CodeGroup>
+

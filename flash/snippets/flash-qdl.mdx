@@ -1,0 +1,44 @@
+This section describes how to flash the image using QDL
+and verify a successful flashing process.
+
+- Ensure the ModemManager service is not running, as it can interfere with QDL by
+  attempting to manage the device as a modem when connected over USB. Disable it
+  before connecting your device. On systemd-based systems, use the following command
+   ```bash
+   sudo systemctl stop ModemManager
+   ```
+
+- Flash the software image using QDL, selecting the appropriate storage option.
+    <CodeGroup>
+    ```bash  UFS
+    qdl --storage ufs prog_firehose_ddr.elf rawprogram*.xml patch*.xml
+    ```
+
+    ```bash  EFS
+    qdl --storage emmc prog_firehose_ddr.elf rawprogram*.xml patch*.xml
+    ```
+    </CodeGroup>
+
+- Flashing is successful if you see *partition 1 is now bootable* on the
+  terminal window as shown in the following message
+  ```text Sample output
+  LOG: INFO: Calling handler for setbootablestoragedrive
+  LOG: INFO: Using scheme of value = 1
+  partition 1 is now bootable
+  LOG: INFO: Calling handler for power
+  LOG: INFO: Will issue reset/power off 100 useconds, if this hangs check if watchdog is enabled
+  LOG: INFO: bsp_target_reset() 1
+  ```
+
+- After a successful flashing operation, run the `lsusb` command to see the
+  device information on the terminal window as shown in the following message
+   ```text Sample output for QCS6490
+   Bus 002 Device 003: ID 05c6:9135 Qualcomm, Inc. qcs6490-rb3gen2-vision-kit
+   Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+   Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+   ```
+
+- If flashing fails, perform the following steps and retry the flashing procedure
+  - Power off the device
+  - Disconnect from the host
+  - Restart the host

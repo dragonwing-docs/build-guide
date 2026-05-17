@@ -1,0 +1,22 @@
+`pcat` is a Qualcomm-provided flashing tool that offers a guided and integrated
+interface for programming software images onto Qualcomm devices. Follow these
+steps to install `pcat` on your system
+
+- Install the following tools on the host computer
+   ```bash
+   qsc-cli tool install --name quts --activate-default-license
+   qsc-cli tool install --name qud --activate-default-license
+   qsc-cli tool install --name pcat --activate-default-license
+   ```
+   <Note>
+    If you encounter issues while installing QUD that require enrolling a public key on your Linux host, refer to the instructions in the README file located at `/opt/QTI/sign/signReadme.txt`.
+   </Note>
+
+- Confirm if the `QTI_HS-USB_QDLoader` driver is available in the installed directory
+   ```bash
+   ls –la /dev/Q*
+   ```
+
+   ```text Sample output
+   crw-rw-rw- 1 root 242 0 Dec 10 10:51 /dev/QTI_HS-USB_QDLoader_9008_3-8:1.0
+   ```
