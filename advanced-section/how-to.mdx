@@ -2,25 +2,6 @@
 title: "How to"
 ---
 
-### **Increase swap space**
-
-If the build fails because of an out-of-memory (OOM) error, increase the swap space to more than 32 GB. Run the following commands to enlarge the swap area:
-
-```text
-<commands>
-```
-
-```text
-sudo su root
-swapon --show
-swapoff /swapfile
-fallocate -l 64G /swapfile
-chmod 600 /swapfile
-mkswap /swapfile
-swapon /swapfile
-free -h
-```
-
 ### **Modify recipe**
 
 Modify and compile a recipe from the same workspace:
