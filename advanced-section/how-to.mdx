@@ -2,22 +2,6 @@
 title: "How to"
 ---
 
-### **Set storage**
-
-The machine configurations have either UFS or EMMC storage enabled by default. UFS storage is enabled by default for QCS6490, IQ-9075 EVK, and IQ-8275 EVK. EMMC storage is enabled by default for IQ-615 EVK. To change the default storage, follow these commands:
-
-```text
-cd meta-qcom/conf/machine
-
-# check the machine configuration to figure out which storage is currently enabled
-cat <machine>.conf | grep "QCOM_PARTITION_FILES_SUBDIR"
-
-# Update QCOM_PARTITION_FILES_SUBDIR to set the correct storage
-# Example,
-# QCOM_PARTITION_FILES_SUBDIR ?= "partitions/iq-615-evk/emmc"
-# QCOM_PARTITION_FILES_SUBDIR ?= "partitions/iq-615-evk/ufs"
-```
-
 ### **Increase swap space**
 
 If the build fails because of an out-of-memory (OOM) error, increase the swap space to more than 32 GB. Run the following commands to enlarge the swap area:
