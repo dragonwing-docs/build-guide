@@ -1,0 +1,39 @@
+---
+title: Common Yocto tasks
+---
+
+This document describes how to perform common Yocto tasks using the `kas` tool.
+
+## Modify a recipe
+
+Use `devtool` to modify a recipe
+```bash
+kas shell -c "devtool modify <recipe>" <config.yml>
+```
+
+Make your changes, then rebuild the recipe
+```bash
+kas shell -c "bitbake <recipe>" <config.yml>
+```
+
+## Generate an SDK
+
+To generate an SDK from the current build configuration
+```bash
+kas shell -c "bitbake -c do_populate_sdk <image>" <config.yml>
+```
+
+When the SDK generation is complete, you can see the images in the
+`build/tmp/deploy/sdk` directory.
+
+## Cleanup build artifacts
+
+- Clean build artifacts for a specific recipe
+   ```bash
+   kas shell -c "bitbake -fc do_cleansstate <recipe>" <config.yml>
+   ```
+
+- Rebuild the recipe after cleanup
+   ```bash
+   kas shell -c "bitbake <recipe>" <config.yml>
+   ```

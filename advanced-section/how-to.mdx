@@ -2,50 +2,6 @@
 title: "How to"
 ---
 
-### **Modify recipe**
-
-Modify and compile a recipe from the same workspace:
-
-```text
-# You can use devtool to modify the source-code used in any of the recipes
-kas shell -c "devtool modify <recipe>" meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/lock.yml
-# Example, kas shell -c "devtool modify linux-qcom" meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/lock.yml
-
-# Build your recipe
-kas shell -c "bitbake <recipe>" meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/lock.yml
-# Example, kas shell -c "bitbake linux-qcom" meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/lock.yml
-```
-
-### **Generate an SDK**
-
-Set up the environment and generate SDK from the same workspace:
-
-```text
-kas shell -c "bitbake -c do_populate_sdk <image>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
-```
-
-When the SDK generation is complete, you can see the images in the `<workspace-dir>/build/tmp/deploy/sdk` directory.
-
-### **Generate an eSDK**
-
-Set up the environment and generate eSDK from the same workspace:
-
-```text
-kas shell -c "bitbake -c do_populate_sdk_ext <image>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
-```
-
-When the eSDK generation is complete, you can see the images in the `<workspace-dir>/build/tmp/deploy/sdk` directory.
-
-### **Clean build artifacts**
-
-1. Clean the build artifacts:
-   ```text
-   kas shell -c "bitbake -fc do_cleansstate <recipe>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
-   ```
-2. Rebuild the recipe after cleaning up the artifacts:
-   ```text
-   kas shell -c "bitbake <recipe>" meta-qcom/ci/<machine>:meta-qcom/ci/<distro>:meta-qcom/ci/lock.yml
-   ```
 
 ### **Build a standalone QDL**
 
