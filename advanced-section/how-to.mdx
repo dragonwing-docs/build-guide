@@ -2,23 +2,6 @@
 title: "How to"
 ---
 
-## **Sync**
-
-### **Set up shared sstate and downloads cache**
-
-You can use the `sstate-cache` and `downloads` directories to reuse the previously built artifacts and accelerate later builds. By default, BitBake creates these directories inside the build directory. You can configure shared `sstate-cache` and `downloads` directories to reuse the same cache across multiple workspaces.
-
-```text
-# export these variables before running the build
-export DL_DIR="/path/to/shared/downloads"
-export SSTATE_DIR="/path/to/shared/sstate"
-
-kas build meta-qcom/ci/<machine.yml>:meta-qcom/ci/<distro.yml>:meta-qcom/ci/linux-qcom-6.18.yml:meta-qcom/ci/lock.yml
-
-# Example, kas build meta-qcom/ci/iq-9075-evk.yml:meta-qcom/ci/qcom-distro.yml:meta-qcom/ci/linux-qcom-6.18.yml:meta-qcom/ci/lock.yml
-```
-
-## **Build**
 ### **Set storage**
 
 The machine configurations have either UFS or EMMC storage enabled by default. UFS storage is enabled by default for QCS6490, IQ-9075 EVK, and IQ-8275 EVK. EMMC storage is enabled by default for IQ-615 EVK. To change the default storage, follow these commands:
