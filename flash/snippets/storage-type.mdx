@@ -1,11 +1,13 @@
-Storage configuration is predefined for each chipset and reference platform,
-with a storage type (UFS or eMMC) already set by default. If you need to modify
-the storage configuration, you must rebuild the image from source with the required
-settings, as this cannot be changed directly in the prebuilt binaries.
+Machine configurations come with either UFS or eMMC storage enabled by default,
+and these settings are reflected in the prebuilt images. If you need to modify
+the storage type, you must update the configuration and rebuild the image, as
+this cannot be changed in prebuilt binaries.
 
-| Chipset / Platform | Default Storage Type  |
-|--------------------|-----------------------|
-| QCS6490            | UFS                   |
-| IQ‑9075 EVK        | UFS                   |
-| IQ‑8275 EVK        | UFS                   |
-| IQ‑615 EVK         | eMMC                  |
+The default storage configurations for supported platforms are
+
+| Machine       | Storage Type      |
+| :---          | :---              |
+| IQ-9075-EVK   | UFS               |
+| IQ-8275-EVK   | UFS               |
+| QCS6490       | UFS               |
+| IQ-615-EVK    | EMMC              |
