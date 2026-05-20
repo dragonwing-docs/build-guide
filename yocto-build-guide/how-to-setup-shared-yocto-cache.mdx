@@ -1,0 +1,16 @@
+---
+title: Setup Shared Yocto Cache
+---
+
+By default, BitBake creates the sstate-cache and downloads directories inside
+the build directory. To speed up builds and reuse previously fetched sources and
+build artifacts across multiple workspaces, you can configure shared locations
+for these directories.
+
+- Export `SSTATE_DIR` and `DL_DIR` variables in your shell before running the
+  build commands.
+
+```bash
+export DL_DIR="/path/to/shared/downloads"
+export SSTATE_DIR="/path/to/shared/sstate"
+```
