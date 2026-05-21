@@ -35,19 +35,24 @@ At a high level, this document covers
 
 ### Compile
 
-For information on the default configurations, see the table _Default values of Machine parameters for QSC CLI_ in the [Release Notes](https://docs.qualcomm.com/doc/80-80021-300/).
+For information on the default configurations, see the table
+_Default values of Machine parameters for QSC CLI_ in the [Release Notes]().
 
-When the download is complete, start the compilation process. Depending on the size of the software and the host computer configuration, the compilation process can take a few hours.
+When the download is complete, start the compilation process. Depending on the
+size of the software and the host computer configuration, the compilation
+process can take a few hours.
 
 ```bash
 qsc-cli chip-software compile --workspace-path '<absolute-workspace-path>'
 ```
 
-This process builds the necessary Qualcomm firmware and completes the Qualcomm Linux build.
+This process builds the necessary Qualcomm firmware and completes the Qualcomm
+Linux build.
 
 ### Recompile
 
-To recompile individual software images after any modifications to the software release, use your existing workspace built using QSC CLI:
+To recompile individual software images after any modifications to the software
+release, use your existing workspace built using QSC CLI:
 
 ```bash
 qsc-cli chip-software compile --image '<software-image-name>' --workspace-path '<absolute-workspace-path>'
