@@ -3,29 +3,6 @@ title: "How to"
 ---
 
 
-If you are already connected to a network and need to reconnect to another network, do the following:
-
-1. Disconnect from the current network:
-   ```text
-   nmcli c down Hydra
-   ```
-   Connection ‘Hydra’ successfully deactivated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/1)
-2. Check the disconnect status:
-   ```text
-   nmcli -p device
-   ```
-   <div className="flex flex-col items-center gap-2">
-     <img src="./media/k2c-qli-build-ga/status_of_devices_switch_network.png" alt="status_of_devices_switch_network" />
-   </div>
-3. Connect to a different Wi-Fi network:
-   ```text
-   nmcli dev wifi connect QualcommAP password XXXXXXXXX
-   ```
-4. Check the connection status:
-   ```text
-   nmcli -p device
-   ```
-
 **Sign in using SSH**
 
 Establish the [network connectivity](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#connect-to-network) before connecting to SSH.

@@ -1,0 +1,54 @@
+## Connect to the network
+
+### Set up Wi-Fi
+
+Wi-Fi is operational in Station mode. The Wi-Fi host driver and the
+authentication for network management are initialized during the device boot up.
+
+- Connect to the Wireless Access Point (Wi-Fi Router)
+   ```bash
+   nmcli dev wifi connect <SSID> password <password>
+   ```
+
+- Check the connection and device status
+   ```bash
+   nmcli -p device
+   ```
+   ![status_of_devices](./media/k2c-qli-build-ga/status_of_devices.png)
+
+- Check the WLAN connection status and IP address
+   ```bash
+   ip address show wlp1s0
+   ```
+   ![chk_ip](./media/k2c-qli-build-ga/chk_ip.png)
+
+4. Ping any website to confirm if the connection is active
+   ```bash
+   ping google.com
+   ```
+
+### Switching Networks
+
+If you are already connected to a network and need to reconnect to another
+network, do the following:
+
+- Disconnect from the current network
+   ```text
+   nmcli c down <SSID>
+   ```
+
+- Check the disconnect status
+   ```text
+   nmcli -p device
+   ```
+   ![status_of_devices_switch_network](./media/k2c-qli-build-ga/status_of_devices_switch_network.png)
+
+- Connect to a different Wi-Fi network
+   ```bash
+   nmcli dev wifi connect QualcommAP password XXXXXXXXX
+   ```
+
+- Check the connection status
+   ```bash
+   nmcli -p device
+   ```
