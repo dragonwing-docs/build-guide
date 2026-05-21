@@ -3,6 +3,7 @@ title: "BSP Image Build with QSC CLI"
 ---
 
 import InstallQscCli from "../flash/snippets/install-qsc-cli.mdx"
+import ValidateInstructions from "../yocto-build-guide/snippets/validate-build-artifacts.mdx"
 
 ## Introduction
 
@@ -57,3 +58,34 @@ release, use your existing workspace built using QSC CLI:
 ```bash
 qsc-cli chip-software compile --image '<software-image-name>' --workspace-path '<absolute-workspace-path>'
 ```
+
+## Build your own configuration
+
+To build your own configuration, you must compile the build with the default
+machine configuration and then compile the software product with your own
+machine and distribution configuration files.
+
+When compiling a software image, ensure that you also compile the software
+product. For example, if you compile `BOOT.MXF.1.0.c1`, ensure that you also
+compile the software product (such as `QCS9100.LE.2.0`).
+
+- Compile the build for the default machine configuration
+
+- Compile the software product with your own machine and distribution
+  configuration files. This command opens a terminal.
+  ```bash
+  qsc-cli chip-software open-build-env --workspace-path <absolute-workspace-path> --image <software-image-name>
+  ```
+- Update the highlighted command according to your own machine configuration
+  and run it on the terminal: For example, to build IQ-9075-EVk
+  change the value of `<machine.yml>` to `iq-9075-evk.yml`.
+  ![build-own-config](../../media/k2c-qli-build-ga/qsc-cli-open-build-terminal.png)
+
+<ValidateInstructions />
+
+<Warning>
+  An environment is set up to run your own build commands for a specific
+  software image. QSC will not track the status of input workspaces in
+  future releases, and you cannot flash these workspaces with qsc-cli.
+</Warning>
+
