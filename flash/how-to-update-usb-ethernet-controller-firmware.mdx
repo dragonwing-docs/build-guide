@@ -1,0 +1,72 @@
+---
+title: Update USB and Ethernet controller firmware
+---
+
+## Introduction
+A firmware update to the USB controller may solve USB or Ethernet connectivity
+issues on the Dragonwing RB3 Gen 2 device.
+
+## Prerequisites
+
+- Ensure that you upgrade the software as described in [Update the software]()
+  before updating the Renesas firmware
+- Ensure that you install the ADB tool. Fastboot comes installed along with it.
+- Connect the device to the Ubuntu host computer using a USB Type-C cable.
+
+## Procedure
+- Register and sign in to [Renesas](https://www.renesas.com)
+
+- Download the firmware from
+  [Renesas](https://www.renesas.com/us/en/products/interface/usb-switches-hubs/upd720201-usb-30-host-controller#design_development)
+
+- Rename the downloaded firmware file to `renesas_usb_fw.mem`
+
+- Connect the device to the host computer using ADB
+
+- Push the firmware to the device using one of the following commands
+  ```bash
+  adb push renesas_usb_fw.mem /lib/firmware
+  ```
+
+  **OR**
+
+  ```bash
+  scp renesas_usb_fw.mem root@<ip-address-of-device>:/lib/firmware
+  ```
+
+  ```bash Sample command
+  scp renesas_usb_fw.mem root@10.92.175.138:/lib/firmware
+  ```
+
+- Activate the firmware using either of the following options
+
+   - Reboot target for USB type A ports
+   - Manually bind the Renesas xHCI driver
+
+    ```bash
+    echo "0001:04:00.0" > /sys/bus/pci/drivers/xhci-pci-renesas/bind
+    ```
+
+- To retrieve the device ID, use the following command
+
+  ```bash
+  sh-5.3# lspci
+  ```
+
+  In the following sample output, ``0001:04:00.0`` is the device ID.
+
+  ```text Sample output
+  0001:00:00.0 PCI bridge: Qualcomm Technologies, Inc SM8250 PCIe Root Complex [Snapdragon 865/870 5G]
+  0001:01:00.0 PCI bridge: Toshiba Corporation Device 0623
+  0001:02:01.0 PCI bridge: Toshiba Corporation Device 0623
+  0001:02:02.0 PCI bridge: Toshiba Corporation Device 0623
+  0001:02:03.0 PCI bridge: Toshiba Corporation Device 0623
+  0001:04:00.0 USB controller: Renesas Electronics Corp. uPD720201 USB 3.0 Host Controller (rev 03)
+  0001:05:00.0 Ethernet controller: Toshiba Corporation Device 0220
+  0001:05:00.1 Ethernet controller: Toshiba Corporation Device 0220
+  ```
+
+- Verify firmware enumeration
+  ```bash
+  dmesg
+  ```
