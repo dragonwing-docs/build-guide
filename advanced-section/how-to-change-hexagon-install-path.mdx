@@ -1,0 +1,17 @@
+---
+title: Change Hexagon tool Install Path
+---
+
+The `HEXAGON_ROOT` environment variable tells the build system where the
+Hexagon tools are installed. By default, `qsc-cli` installs the tools under
+`$HOME`, but you can install them to any directory using the `--path` option.
+
+After installation, set `HEXAGON_ROOT` to the same directory you passed to
+`--path`. Use an absolute path in both commands, as shown in the following
+example:
+
+```bash
+mkdir -p <tools-dir>
+qsc-cli tool extract --name hexagon8.4 --required-version 8.4.07 --path <tools-dir>/8.4.07
+export HEXAGON_ROOT="<tools-dir>"
+```
