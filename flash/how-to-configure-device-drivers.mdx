@@ -1,0 +1,87 @@
+---
+title: Configure Alternate Device Drivers
+---
+
+## Enable Camera Overlays
+
+<Note>
+This section applies only to QCS6490, IQ-9075, and IQ-8275.
+</Note>
+
+When you flash and boot qcom-multimedia-proprietary-image, the upstream camera
+stack is enabled by default. You can change this setting by updating the EFI
+variable.
+
+Update the EFI variable at runtime after the device boots. On the first boot,
+set the EFI variable using the sysfs node, then reboot to enable CAMX on
+subsequent boots.
+
+Run the following steps to enable camera overlay
+
+- Store the driver name `camx` in a temporary file. Command uses `-n` flag to
+  ensure the content doesn't have any trailing new characters.
+  ```bash
+  echo -n "camx" > /tmp/overlay
+  ```
+
+- The EFI variable used to control the overlays loaded during UEFI  boot is
+  `882f8c2b-9646-435f-8de5-f208ff80c1bd-VendorDtbOverlays`. Use `efivar` to
+  write the data into the runtime EFI variable
+  ```bash
+  efivar -n 882f8c2b-9646-435f-8de5-f208ff80c1bd-VendorDtbOverlays -w -f /tmp/overlay
+  ```
+
+- Print the EFI variable to confirm if the updates have been made
+  ```bash
+  efivar -n 882f8c2b-9646-435f-8de5-f208ff80c1bd-VendorDtbOverlays -p
+  ```
+
+- Reboot the device to enable the new driver
+  ```bash
+  sync
+  reboot
+  ```
+
+- After rebooting, you can check the UEFI serial logs to verify that the camx
+  overlay has been applied.
+  ```text Sample output for IQ-9075-EVK
+  Variable VendorDtbOverlays read successfully. Data: camx
+  ProcessQcomRuntimeOverlayRequest: Parsed camx
+
+  FindConfigToBoot:Booting with = qcom,qcs8275-iot-camx
+  FindConfigToBoot: i = 0 fdt fdt-monaco-evk.dtb str len = 18
+  FindConfigToBoot: i = 1 fdt fdt-monaco-evk-camx.dtbo str len = 24
+  ParseFitDt::
+  Config fdt-monaco-evk.dtb & Type 0
+  Config fdt-monaco-evk-camx.dtbo & Type 1
+  FitLoadDtbFromFdt: Config fdt-monaco-evk.dtb & Type 0
+  FitLoadDtbFromFdt: Config fdt-monaco-evk-camx.dtbo & Type 1
+  ```
+
+## Enable upstream video driver
+
+<Note>
+This section applies only to IQ-615 EVK.
+</Note>
+
+IQ‑615 EVK only supports the upstream video driver `venus`. The video overlay
+functionality is not supported.
+
+When you flash and boot `qcom-multimedia-proprietary-image`, the upstream video
+driver is not enabled by default. This can be changed by updating the kernel
+module configuration.
+
+- Enable the upstream video driver
+  ```bash
+  update-alternatives --install /etc/modprobe.d/blacklist-video.conf blacklist-video /etc/modprobe.d/blacklist-video.conf.vidc 200
+  ```
+
+- Reboot the device and run `lsmod` to confirm if the changes have been applied.
+  ```bash
+  lsmod | grep venus
+  ```
+
+  ```text Expected output
+  venus_enc           28672   0
+  venus_dec           28672   0
+  ```
