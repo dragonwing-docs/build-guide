@@ -24,9 +24,8 @@
             "group": "Advanced Guide",
             "pages": [
               "advanced-section/build-firmware",
-              "flash/flash-with-pcat",
               "advanced-section/build-with-qsc-cli",
-              "flash/flash-with-qsc-cli"
+              "flash/flash-with-pcat"
             ]
           }
         ]
