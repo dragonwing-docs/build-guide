@@ -3,35 +3,6 @@ title: "How to"
 ---
 
 
-**Sign in using SSH**
-
-Establish the [network connectivity](https://docs.qualcomm.com/doc/80-80021-254/topic/how_to.html?product=895724676033554725&facet=Build%20Guide&version=2.0-rc2#connect-to-network) before connecting to SSH.
-
-1. Locate the IP address of the device according to the type of network connection, using the UART console on the Linux host: For Ethernet:
-   ```text
-   ip address show eth2
-   ```
-   For Wi-Fi:
-   ```text
-   ip address show wlp1s0
-   ```
-2. Use the IP address from the Linux host to establish an SSH connection to the device:
-   ```text
-   ssh root@ip-address
-   ```
-   **Example** `ssh root@192.168.0.222`
-3. Connect to the SSH shell using the following password:
-   ```text
-   oelinux123
-   ```
-
-<Note>
-  **Note**
-
-  - Connect the remote host to the same Wi-Fi access point as the device.
-  - To create a non-root user account, see [Create a non-root user account](https://docs.qualcomm.com/bundle/publicresource/topics/80-80021-251/faqs.html#non-root-acc).
-</Note>
-
 ### **Configure Ethernet with RJ45 port**
 
 Ethernet/RJ45 port is enabled as a downstream port of PCIe to USB controller (`renesas`). Ensure that the `renesas_usb_fw.mem` file is available at the `var/usbfw` directory.

@@ -1,0 +1,39 @@
+---
+title: Sign in using SSH
+---
+
+## Sign in using SSH
+
+Establish [network connectivity](./how-to-connect-to-wifi) before connecting to
+SSH.
+
+- Locate the IP address of the device according to the type of network
+  connection, using the UART console on the Linux host
+  <CodeGroup>
+  ```bash Ethernet
+  ip address show eth2
+  ```
+
+  ```bash Wi-Fi
+  ip address show wlp1s0
+  ```
+  </CodeGroup>
+
+- Use the IP address from the Linux host to establish an SSH connection
+  to the device
+  ```bash
+  ssh root@ip-address
+  ```
+
+  ```text Example
+  ssh root@192.168.0.222
+  ```
+
+- Connect to the SSH shell using the following password
+   ```text
+   oelinux123
+   ```
+
+## Related Topics
+- Connect the remote host to the same Wi-Fi access point as the device.
+- To create a non-root user account, see [Create a non-root user account]().
