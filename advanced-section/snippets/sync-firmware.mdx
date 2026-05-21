@@ -1,9 +1,3 @@
-Commands in the following sections are based on the binary and source for
-firmware images without modem and GPS (see the command in
-[Mapping firmware distributions to git repositories]()).
-Hence, `qualcomm-linux-spf-2-0_ap_standard_oem_nomodem` is used. If you use
-any other distribution, then update the directory accordingly.
-
 The following table describes the Qualcomm Yocto layers and release tags
 
 Qualcomm Yocto layers and manifest tags
@@ -28,20 +22,15 @@ Mapping access levels to firmware distributions
 
 The following table maps the firmware distributions to git repositories
 
-#### Mapping firmware distributions to git repositories
-
 | **Firmware distribution**                          | **Git command**                                                                                                                                   | **Directory into which firmware gets synced on git clone** |
 | :-:                                                | :-:                                                                                                                                               | :-:                                                        |
 | Qualcomm_Linux.SPF.2.0\|AP\|Standard\|OEM\|NoModem | `git clone -b <firmware release tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem.git` | `qualcomm-linux-spf-2-0_ap_standard_oem_nomodem`           |
 | Qualcomm_Linux.SPF.2.0\|AP\|Standard\|OEM\         | `git clone -b <firmware release tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_ap_standard_oem.git`         | `qualcomm-linux-spf-2-0_ap_standard_oem`                   |
 | Qualcomm_Linux.SPF.2.0\|AMSS\|Standard\|OEM\       | `git clone -b <firmware release tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_amss_standard_oem.git`       | `qualcomm-linux-spf-2-0_amss_standard_oem`                 |
 
-The **Git command** column in the
-[Mapping firmware distributions to git repositories](#mapping-firmware-distribution-to-git-repositories)
-table provides information about the git repositories that contain the firmware sources. Qualcomm servers
-host these repositories. Clone the appropriate repositories based on your access profile and use case.
-
-The following `git clone` command downloads the selected firmware components in source, except the modem
+The following examples demonstrate syncing and building firmware sources using
+the `Qualcomm_Linux.SPF.2.0|AP|Standard|OEM|NoModem` distribution. Modify the
+instructions based on your access profile.
 
 ```bash
 mkdir -p <FIRMWARE_ROOT>
