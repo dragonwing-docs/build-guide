@@ -201,39 +201,6 @@ Sync
    QSC CLI uses the home directory only for a few kilo bytes (kB). Clear
    a few MBs from your home directory.
 
--  "[Error]: The “path” argument must be of type string. Received undefined"
-
-   **Error excerpt**
-
-   .. container:: nohighlight
-      
-      ::
-
-         qsc-cli chip-software download --workspace-path '/local/mnt/workspace/<userid>/K2L/QSC_CLI_BUILD/build' --product 'QCM6490.LE.2.0' --release 'r00004.2' --distribution 'Qualcomm_Linux.SPF.2.0|TEST|DEVICE|PUBLIC'
-         [Info]: Starting qsc-cli version 0.0.0.7 
-         (node:2924765) ExperimentalWarning: The Fetch API is an experimental feature. This feature could change at any time
-         (Use `qsc-cli --trace-warnings ...` to show where the warning was created)
-         [Info]: Checking if Workspace already exists
-         [Info]: Saved updated Workspace info
-         [Info]: Workspace Setup Completed
-         [Error]: The "path" argument must be of type string. Received undefined
-
-   **Solution**
-
-   This error occurs if QSC CLI is incompatible with Qlauncher. Qlauncher will be deprecated and replaced with a new application from the QSC. If you have Qlauncher in the workspace, you can run the following commands:
-
-   .. container:: nohighlight
-      
-      ::
-
-         # Find your workspace within the Qlauncher UI
-         # Take a backup of the following metadata file if you want to preserve the older workspace created with Qlauncher.
-         # These will work only with Qlauncher app. You can reinstall the app at a later time again to access. If you don't 
-         # need the workspaces, you can delete this file using:
-         mv /var/lib/qcom/data/qualcomm_launcher/workspaces2.json /var/lib/qcom/data/qualcomm_launcher/workspaces2.json.bak
-         # Uninstall Qlauncher with the following command:
-         qsc-cli tool uninstall qualcomm_launcher
-
 -  "docker: Error response from daemon: error while creating mount
    source path ‘/usr2/<userid>/.netrc’: mkdir /usr2/<userid>/.netrc:
    permission denied"
