@@ -1,51 +1,37 @@
-To flash your device, you need to obtain the flashable image archive
-either from your build output or by downloading a prebuilt package from
-an artifactory. These packages follow the naming format
-`<IMAGE>-<MACHINE>.rootfs.qcomflash.tar.gz`. The image is typically provided
-as a compressed archive and must be unpacked before use.
+Before flashing, you need a flashable image directory on your host machine.
+Depending on how you obtained your image, follow one of the paths below.
 
-- Extract the archive.The following examples use
-  `qcom-multimedia-proprietary-image` as the image name
+<Tabs>
+  <Tab title="Prebuilt Image">
+    Prebuilt images are distributed as compressed archives. Download the archive for your
+    device from the [Obtain Prebuilt Images](/Key-Documents/Build-Guide/flash/obtain-prebuilts)
+    section, then extract it and navigate into the resulting directory.
 
-  <CodeGroup>
+    - Extract the archive.
 
-  ```bash IQ-9075-EVK
-  tar -xvf qcom-multimedia-proprietary-image-iq-9075-evk.rootfs.qcomflash.tar.gz
-  ```
+      ```bash
+      unzip <prebuilt-image>.zip
+      ```
 
-  ```bash IQ-8275-EVK
-  tar -xvf qcom-multimedia-proprietary-image-iq-8275-evk.rootfs.qcomflash.tar.gz
-  ```
+    - Navigate to the unpacked directory.
 
-  ```bash IQ-615-EVK
-  tar -xvf qcom-multimedia-proprietary-image-iq-615-evk.rootfs.qcomflash.tar.gz
-  ```
+      ```bash
+      cd <unzipped-image-directory>/<machine>/<image>-<machine>
+      ```
 
-  ```bash QCS6490
-  tar -xvf qcom-multimedia-proprietary-image-rb3gen2-core-kit.rootfs.qcomflash.tar.gz
-  ```
+  </Tab>
+  <Tab title="Compiled Image">
+    After a successful build, the flashable image directory is already present in
+    your build output. Navigate directly to it.
 
-  </CodeGroup>
+    ```bash
+    cd build/tmp/deploy/images/<machine>/<image>-<machine>.rootfs.qcomflash
+    ```
 
-- Navigate to the unpacked directory. All subsequent instructions are expected to be
-  run from this directory unless stated otherwise.
+  </Tab>
+</Tabs>
 
-  <CodeGroup>
-
-  ```bash IQ-9075-EVK
-  cd qcom-multimedia-proprietary-image-iq-9075-evk.rootfs.qcomflash
-  ```
-
-  ```bash IQ-8275-EVK
-  cd qcom-multimedia-proprietary-image-iq-8275-evk.rootfs.qcomflash
-  ```
-
-  ```bash IQ-615-EVK
-  cd qcom-multimedia-proprietary-image-iq-615-evk.rootfs.qcomflash
-  ```
-
-  ```bash QCS6490
-  cd qcom-multimedia-proprietary-image-rb3gen2-core-kit.rootfs.qcomflash
-  ```
-
-  </CodeGroup>
+<Warning>
+All subsequent instructions are expected to be run from this directory unless
+stated otherwise.
+</Warning>
