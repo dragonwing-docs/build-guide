@@ -14,11 +14,7 @@
         "groups": [
           {
             "group": "Quickstart Guide",
-            "pages": ["flash/flash-with-qdl"]
-          },
-          {
-            "group": "Yocto Guide",
-            "pages": ["yocto-build-guide/build-guide"]
+            "pages": ["flash/obtain-prebuilts", "flash/flash-with-qdl"]
           },
           {
             "group": "Advanced Guide",
