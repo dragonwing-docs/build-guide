@@ -1,0 +1,32 @@
+---
+title: "Obtain Prebuilt Images and eSDK"
+---
+
+import prebuilt_urls from "./release-information.jsx";
+
+
+## Prebuilt Images
+
+This page is for developers who want to upgrade the software on their Qualcomm
+hardware devices without building the images from source. It provides direct
+download links to pre-built flashable images for supported development kits,
+so you can quickly get the latest software onto your device.
+
+Pre-built binaries are hosted in Qualcomm software releases archives on
+[CodeLinaro](https://artifacts.codelinaro.org/ui/native/qli-ci/flashable-binaries/meta-qcom/).
+
+
+| Kit Name                                                                                                          | Chipset                       |  Binaries Download Link                                                                                                                                                       |
+| :--                                                                                                               | :--                           | :--                                                                                                                                                                           |
+| Qualcomm® RB3 Gen 2 Core Development Kit <br /> Qualcomm® RB3 Gen 2 Lite Core Development Kit QCS6490 / QCS6430   | QCS6490 / QCS5430             | <a href={prebuilt_urls["rb3gen2-core-kit"][0]}>qcom-multimedia-image</a> <br /> <a href={prebuilt_urls["rb3gen2-core-kit"][1]}>qcom-multimedia-proprietary-image</a>          |
+| Qualcomm® EVK                                                                                                     | QCS9075                       | <a href={prebuilt_urls["iq-9075-evk"][0]}>qcom-multimedia-image</a> <br /> <a href={prebuilt_urls["iq-9075-evk"][1]}>qcom-multimedia-proprietary-image</a>                    |
+| Qualcomm® EVK                                                                                                     | QCS8300                       | <a href={prebuilt_urls["iq-8275-evk"][0]}>qcom-multimedia-image</a> <br /> <a href={prebuilt_urls["iq-8275-evk"][1]}>qcom-multimedia-proprietary-image</a>                    |
+| Qualcomm® EVK                                                                                                     | QCS615                        | <a href={prebuilt_urls["iq-615-evk"][0]}>qcom-multimedia-image</a> <br /> <a href={prebuilt_urls["iq-615-evk"][1]}>qcom-multimedia-proprietary-image</a>                      |
+
+
+## eSDK
+The eSDK is an installer generated from the final image including the SDKs. It
+provides a complete Yocto environment that allows you to synchronize, modify,
+compile, and install applications and open-source plugins. You can access the
+prebuilt eSDK images on
+[CodeLinaro](https://artifacts.codelinaro.org/ui/native/qli-ci/flashable-binaries/meta-qcom/qcom-armv8a).
