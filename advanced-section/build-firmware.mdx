@@ -18,7 +18,7 @@ import SyncInstructions from "../../Yocto-Guide/snippets/sync-meta-qcom-extras-r
 import BuildInstructions from "../../Yocto-Guide/snippets/build-meta-qcom-extras.mdx"
 import ValidateInstructions from "../../Yocto-Guide/snippets/validate-build-artifacts.mdx"
 
-import { firmware_chipsets } from "./release-information.jsx"
+import { firmware_chipsets, release_tags } from "./release-information.jsx"
 
 ## Introduction
 
@@ -34,7 +34,6 @@ At a high level, this document explains how to
 - Include firmware sources in BSP image build - [Build BSP Image](#build-bsp-image)
 
 ## Supported Chipsets
-
 The following chipsets are supported by this document. If your chipset is not
 listed, the firmware build process described here does not apply to your device.
 
@@ -66,6 +65,26 @@ listed, the firmware build process described here does not apply to your device.
 ## Host Setup
 <HostSetup />
 <FirmwareHostSetup />
+
+## Release Tags
+The following table describes the Qualcomm Yocto layers and release tags
+
+<table>
+  <thead>
+    <tr>
+      <th style={{textAlign:"left"}}>Release Tag</th>
+      <th style={{textAlign:"left"}}>Identifier</th>
+    </tr>
+  </thead>
+  <tbody>
+    {release_tags.map(({ label, identifier}) => (
+      <tr key={label}>
+        <td>{label}</td>
+        <td>{identifier}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
 
 ## Sync Firmware Sources
 <SyncFirmware />

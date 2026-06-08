@@ -30,3 +30,9 @@ export const firmware_chipsets = [
     qsc_cli_supported: true,
   },
 ];
+
+export const release_tags = [
+  { label: "meta-qcom-release-tag", identifier: "qli-2.0" },
+  { label: "meta-qcom-extras-release-tag", identifier: "qli-2.0" },
+  { label: "firmware-release-tag", identifier: "r.2.0_00006.0" },
+];
