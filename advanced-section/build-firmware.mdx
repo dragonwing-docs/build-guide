@@ -18,6 +18,8 @@ import SyncInstructions from "../../Yocto-Guide/snippets/sync-meta-qcom-extras-r
 import BuildInstructions from "../../Yocto-Guide/snippets/build-meta-qcom-extras.mdx"
 import ValidateInstructions from "../../Yocto-Guide/snippets/validate-build-artifacts.mdx"
 
+import { firmware_chipsets } from "./release-information.jsx"
+
 ## Introduction
 
 This section provides a high-level overview of how to build firmware
@@ -30,6 +32,30 @@ At a high level, this document explains how to
 - Download the firmware sources from Chipcode - [Sync Firmware Sources](#sync-firmware-sources)
 - Compile the firmware sources - [Build Firmware](#build-firmware)
 - Include firmware sources in BSP image build - [Build BSP Image](#build-bsp-image)
+
+## Supported Chipsets
+
+The following chipsets are supported by this document. If your chipset is not
+listed, the firmware build process described here does not apply to your device.
+
+<table>
+  <thead>
+    <tr>
+      <th style={{textAlign:"left"}}>Chipset</th>
+      <th style={{textAlign:"left"}}>Description</th>
+      <th style={{textAlign:"left"}}>Supported</th>
+    </tr>
+  </thead>
+  <tbody>
+    {firmware_chipsets.map(({ label, firmware_build_supported, description }) => (
+      <tr key={label}>
+        <td>{label}</td>
+        <td>{description}</td>
+        <td>{firmware_build_supported ? "✓" : "✗"}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
 
 ## Host System Requirements
 <HostRequirements />
