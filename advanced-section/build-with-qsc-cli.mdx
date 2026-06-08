@@ -4,7 +4,7 @@ title: "BSP Image Build with QSC CLI"
 
 import InstallQscCli from "../flash/snippets/install-qsc-cli.mdx"
 import ValidateInstructions from "../../Yocto-Guide/snippets/validate-build-artifacts.mdx"
-import { firmware_chipsets } from "./release-information.jsx"
+import { firmware_chipsets, qsc_release_parameters } from "./release-information.jsx"
 
 ## Introduction
 
@@ -51,11 +51,30 @@ listed, the QSC CLI build process described here does not apply to your device.
 
 - Download a software release using `qsc-cli`. The values for the parameters
   `--product`, `--distribution`, and `--release` are documented
-  in the [Release Notes]().
+  in the following table.
 
   ```bash
   qsc-cli chip-software download --workspace-path '<absolute-workspace-path>' --product '<product-id>' --distribution '<distribution>' --release '<release-id>'
   ```
+
+<table>
+  <thead>
+    <tr>
+      <th>--product</th>
+      <th>--release</th>
+      <th>--image</th>
+    </tr>
+  </thead>
+  <tbody>
+    {qsc_release_parameters.map(({ product, release, images }) => (
+      <tr key={product}>
+        <td>{product}</td>
+        <td>{release}</td>
+        <td>{images.map((image) => <span key={image}>{image}<br/></span>)}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
 
 ## Build the default configuration
 
