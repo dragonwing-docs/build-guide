@@ -22,25 +22,25 @@
 - Install LLVM for AOP, Qualcomm<sup>®</sup> Trusted Execution Environment
   (TEE), and boot compilation
   ```bash
-  cd <FIRMWARE_ROOT>
+  cd <firmware-root>
   mkdir llvm
   # Sign in to qsc-cli and activate the license
   qsc-cli login
   qsc-cli tool activate-license --name sdllvm_arm
   # LLVM requirement for boot compilation is 14.0.4
-  qsc-cli tool install --name sdllvm_arm --required-version 14.0.4 --path <FIRMWARE_ROOT>/llvm/14.0.4
-  chmod -R 777 <FIRMWARE_ROOT>/llvm/14.0.4
+  qsc-cli tool install --name sdllvm_arm --required-version 14.0.4 --path <firmware-root>/llvm/14.0.4
+  chmod -R 777 <firmware-root>/llvm/14.0.4
   # LLVM requirement for the Qualcomm TEE compilation is 16.0.7
-  qsc-cli tool install --name sdllvm_arm --required-version 16.0.7 --path <FIRMWARE_ROOT>/llvm/16.0.7
-  chmod -R 777 <FIRMWARE_ROOT>/llvm/16.0.7
+  qsc-cli tool install --name sdllvm_arm --required-version 16.0.7 --path <firmware-root>/llvm/16.0.7
+  chmod -R 777 <firmware-root>/llvm/16.0.7
   ```
 
 - Export the `SECTOOLS` variable and compile the firmware builds
-  (`<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem` is the
+  (`<firmware-root>/<clone-directory>` is the
   top-level directory)
   ```bash
-  export SECTOOLS=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux/sectools
-  export SECTOOLS_DIR=<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux
+  export SECTOOLS=<firmware-root>/<clone-directory>/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux/sectools
+  export SECTOOLS_DIR=<firmware-root>/<clone-directory>/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux
   ```
 
 - Install and set up Hexagon. Set the environment variable HEXAGON_ROOT to the
@@ -77,7 +77,7 @@
 
 - Go to the following directory
    ```bash
-   cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/DSP.AT.1.0.1/dsp_proc/build/ms
+   cd <firmware-root>/<clone-directory>/DSP.AT.1.0.1/dsp_proc/build/ms
    ```
 
 - Clean the build
@@ -98,7 +98,7 @@
 
 - Compiler version: LLVM version must be updated to 14.0.4
   ```bash
-  export LLVM=<FIRMWARE_ROOT>/llvm/14.0.4/
+  export LLVM=<firmware-root>/llvm/14.0.4/
   ```
 - Python version: Python 3.10
 - libffi6 package
@@ -113,7 +113,7 @@
 
 - Go to the following directory
    ```bash
-   cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/BOOT.MXF.1.0.c1/
+   cd <firmware-root>/<clone-directory>/BOOT.MXF.1.0.c1/
    ```
 
 - Install the dependencies
@@ -147,9 +147,9 @@
 
 - Install LLVM
    ```bash
-   cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+   cd <firmware-root>/<clone-directory>/TZ.XF.5.29.1/trustzone_images/build/ms/
    vi build_config_deploy_monaco.xml
-   # Edit all the occurrences of /pkg/qct/software/llvm/release/arm/16.0.7/ to <FIRMWARE_ROOT>/llvm/16.0.7/
+   # Edit all the occurrences of /pkg/qct/software/llvm/release/arm/16.0.7/ to <firmware-root>/llvm/16.0.7/
    ```
 
 - Clean the build
@@ -159,7 +159,7 @@
 
 - Build the image
    ```bash
-   cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/TZ.XF.5.29.1/trustzone_images/build/ms/
+   cd <firmware-root>/<clone-directory>/TZ.XF.5.29.1/trustzone_images/build/ms/
    python build_all.py -b TZ.XF.5.0 CHIPSET=monaco --cfg=build_config_deploy_monaco.xml
    ```
 
@@ -174,17 +174,17 @@
 
 - Go to the following directory
    ```bash
-   cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/AOP.HO.3.6.1/aop_proc/build/
+   cd <firmware-root>/<clone-directory>/AOP.HO.3.6.1/aop_proc/build/
    ```
 
 - Clean the build
    ```bash
-   ./build_monaco.sh -c -l <FIRMWARE_ROOT>/llvm/14.0.4/
+   ./build_monaco.sh -c -l <firmware-root>/llvm/14.0.4/
    ```
 
 - Build the image
    ```bash
-   ./build_monaco.sh -l <FIRMWARE_ROOT>/llvm/14.0.4/
+   ./build_monaco.sh -l <firmware-root>/llvm/14.0.4/
    ```
 
 **CPUCP firmware**
@@ -212,12 +212,12 @@ the build.
 - Create an integrated firmware binary from the individual components that
   you compiled
   ```bash
-  cd <FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/build
+  cd <firmware-root>/<clone-directory>/QCS8300.LE.2.0/common/build
   python build.py --imf
   ```
 
 - Firmware prebuilt is successful if the following zip files are generated in
-  the `<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem/QCS8300.LE.2.0/common/build/ufs/bin`
+  the `<firmware-root>/<clone-directory>/QCS8300.LE.2.0/common/build/ufs/bin`
   directory
   - `QCS8300_bootbinaries.zip`
   - `QCS8300_dspso.zip`
