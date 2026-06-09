@@ -1,12 +1,15 @@
-The following instructions demonstrate syncing and building firmware sources using
-the `Qualcomm_Linux.SPF.2.0|AP|Standard|OEM|NoModem` distribution. Modify the
-instructions based on your access profile.
+- Create a workspace directory for the firmware sources and navigate to it.
+  All subsequent instructions assume this as the working directory.
+  ```bash
+  mkdir -p <firmware-root>
+  cd <firmware-root>
+  ```
 
-```bash
-mkdir -p <FIRMWARE_ROOT>
-cd <FIRMWARE_ROOT>
-git clone -b <firmware-release-tag> --depth 1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem.git
-```
+- Clone the firmware sources from Chipcode using the release tag and clone
+  url from the [Firmware Source Mapping](#firmware-source-mapping) table.
+  ```bash
+  git clone -b <firmware-release-tag> --depth 1 <clone-url>
+  ```
 
-The `git clone` command clones the content into the
-`<FIRMWARE_ROOT>/qualcomm-linux-spf-2-0_ap_standard_oem_nm` directory.
+- Substitute the `<firwmare-root>` and `<clone-directory>` in the following
+  commands with the correct values based on the chosen access profile.
