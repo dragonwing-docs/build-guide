@@ -2,21 +2,21 @@ The following tables describe the firmware distributions that you can download.
 For more information about the Yocto layers, see
 [Qualcomm Linux metadata layers](/Key-Documents/Yocto-Guide/qualcomm-linux-metadata-layers).
 
-Mapping access levels to firmware distributions
+### Mapping access levels to firmware distributions
 
-| **Access level**                                  | **Distribution**                                                                                          | **Yocto layers**                                              |
-| ---                                               | ---                                                                                                       | ---                                                           |
-| Licensed developers with authorized access        | High-level OS and firmware source (GPS only)<br /> `Qualcomm_Linux.SPF.2.0\|AP\|Standard\|OEM\|NoModem`   | `meta-qcom`<br />`meta-qcom-distro`<br />`meta-qcom-extras`   |
-| Licensed developers (contact Qualcomm for access) | High-level OS and firmware (GPS only) source<br /> `Qualcomm_Linux.SPF.2.0\|AP\|Standard\|OEM`            | `meta-qcom`<br />`meta-qcom-distro`<br />`meta-qcom-extras`   |
-| Licensed developers (contact Qualcomm for access) | High-level OS and firmware (GPS and modem) source<br /> `Qualcomm_Linux.SPF.2.0\|AMSS\|Standard\|OEM`     | `meta-qcom`<br />`meta-qcom-distro`<br />`meta-qcom-extras`   |
+| **Distribution**                                        | **Description**                                       | **Yocto layers**                                              |
+| ---                                                     | ---                                                   | ---                                                           |
+| Qualcomm_Linux.SPF.2.0\|AP\|Standard\|OEM\|NoModem      | High-level OS and firmware source (GPS only)          | `meta-qcom`<br />`meta-qcom-distro`<br />`meta-qcom-extras`   |
+| Qualcomm_Linux.SPF.2.0\|AP\|Standard\|OEM               | High-level OS and firmware (GPS only) source          | `meta-qcom`<br />`meta-qcom-distro`<br />`meta-qcom-extras`   |
+| Qualcomm_Linux.SPF.2.0\|AMSS\|Standard\|OEM             | High-level OS and firmware (GPS and modem) source     | `meta-qcom`<br />`meta-qcom-distro`<br />`meta-qcom-extras`   |
 
-The following table maps the firmware distributions to git repositories
+### Mapping firmware distributions to git repositories
 
-| **Firmware distribution**                          | **Git command**                                                                                                                                   | **Directory into which firmware gets cloned**              |
-| :-:                                                | :-:                                                                                                                                               | :-:                                                        |
-| Qualcomm_Linux.SPF.2.0\|AP\|Standard\|OEM\|NoModem | `git clone -b <firmware release tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem.git` | `qualcomm-linux-spf-2-0_ap_standard_oem_nomodem`           |
-| Qualcomm_Linux.SPF.2.0\|AP\|Standard\|OEM\         | `git clone -b <firmware release tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_ap_standard_oem.git`         | `qualcomm-linux-spf-2-0_ap_standard_oem`                   |
-| Qualcomm_Linux.SPF.2.0\|AMSS\|Standard\|OEM\       | `git clone -b <firmware release tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_amss_standard_oem.git`       | `qualcomm-linux-spf-2-0_amss_standard_oem`                 |
+| **Distribution**                                   | **Git command**                                                                                                                                   | **Clone Directory**                                        |
+| ---                                                | ---                                                                                                                                               | ---                                                        |
+| Qualcomm_Linux.SPF.2.0\|AP\|Standard\|OEM\|NoModem | `git clone -b <firmware-release-tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_ap_standard_oem_nomodem.git` | `qualcomm-linux-spf-2-0_ap_standard_oem_nomodem`           |
+| Qualcomm_Linux.SPF.2.0\|AP\|Standard\|OEM\         | `git clone -b <firmware-release-tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_ap_standard_oem.git`         | `qualcomm-linux-spf-2-0_ap_standard_oem`                   |
+| Qualcomm_Linux.SPF.2.0\|AMSS\|Standard\|OEM\       | `git clone -b <firmware-release-tag> --depth1 https://qpm-git.qualcomm.com/home2/git/qualcomm/qualcomm-linux-spf-2-0_amss_standard_oem.git`       | `qualcomm-linux-spf-2-0_amss_standard_oem`                 |
 
 The following examples demonstrate syncing and building firmware sources using
 the `Qualcomm_Linux.SPF.2.0|AP|Standard|OEM|NoModem` distribution. Modify the
