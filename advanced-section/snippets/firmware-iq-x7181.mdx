@@ -1,0 +1,303 @@
+**Prerequisites**
+
+- Ensure that the working shell is `bash`.
+  ```bash
+  echo $0
+  ```
+
+  The expected output of the command should be `bash`. If not, enter the
+  bash shell
+  ```bash
+  bash
+  ```
+
+- Install the libffi6 package using the following commands. This is required for
+  the QAIC compiler, which generates the header and the source files from the
+  IDL files
+  ```bash
+  curl -LO http://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi6_3.2.1-8_amd64.deb
+  sudo dpkg -i libffi6_3.2.1-8_amd64.deb
+  ```
+
+- Install LLVM for AOP, Qualcomm<sup>®</sup> Trusted Execution Environment
+  (TEE), and boot compilation
+  ```bash
+  cd <firmware-root>
+  mkdir llvm
+
+  # Sign in to qsc-cli and activate the license
+  qsc-cli login
+  qsc-cli tool activate-license --name sdllvm_arm
+
+  # LLVM requirement for aDSP is 14.0.1
+  qsc-cli tool install --name sdllvm_arm --required-version 14.0.1 --path <firmware-root>/llvm/14.0.1
+  chmod -R 777 <firmware-root>/llvm/14.0.1
+
+  # LLVM requirement for the AOP is 14.0.0
+  qsc-cli tool install --name sdllvm_arm --required-version 14.0.0 --path <firmware-root>/llvm/14.0.0
+  chmod -R 777 <firmware-root>/llvm/14.0.0
+
+  # LLVM requirement for BOOT compilation is 16.0.2
+  qsc-cli tool install --name sdllvm_arm --required-version 14.0.0 --path <firmware-root>/llvm/16.0.2
+  chmod -R 777 <firmware-root>/llvm/16.0.2
+
+  # LLVM requirement for BOOT_UEFI and Qualcomm TEE (TZ_XF) compilation is 18.0.1
+  qsc-cli tool install --name sdllvm_arm --required-version 18.0.1 --path <firmware-root>/llvm/18.0.1
+  chmod -R 777 <firmware-root>/llvm/18.0.1
+  ```
+
+- Export the `SECTOOLS` variable and compile the firmware builds
+  (`<firmware-root>/<distro-clone-directory>` is the top-level directory)
+  ```bash
+  export SECTOOLS=<firmware-root>/<distro-clone-directory>/Hamoa_IOT.UBUN.1.0/common/sectoolsv2/ext/Linux/sectools
+  export SECTOOLS_DIR=<firmware-root>/<distro-clone-directory>/Hamoa_IOT.UBUN.1.0/common/sectoolsv2/ext/Linux
+  ```
+
+- Install and set up Qualcomm<sup>®</sup> Hexagon<sup>™</sup> Processor. Set
+  the environment variable HEXAGON_ROOT to the path where the Hexagon SDK is
+  installed. To change the install path when using
+  `qsc-cli`, see [Change the Hexagon tool install path](../how-to-change-hexagon-install-path).
+  ```bash
+  qsc-cli tool extract --name hexagon8.4 --required-version 8.6.06
+  export HEXAGON_ROOT=$HOME/Qualcomm/HEXAGON_Tools
+  echo $HEXAGON_ROOT
+  ```
+
+**Build aDSP**
+
+**Tools required**
+
+- Compiler version: Hexagon 8.6.06
+- Python version: Python 3.8.2
+- libffi6 package
+
+**Build steps**
+
+- Check Hexagon DIR
+  ```bash
+  export HEXAGON_ROOT=$HOME/QUalcomm/HEXAGON_Tools
+  echo $HEXAGON_ROOT
+  ```
+- Install the device tree compiler
+   ```bash
+   sudo apt-get install device-tree-compiler
+   export DTC=/usr/bin
+   ```
+- Nanopb integration (one-time setup)
+   ```bash
+   cd <firmware-root>/<distro-clone-directory>/ADSP.HT.5.9/adsp_proc/qsh_api
+   curl https://jpa.kapsi.fi/nanopb/download/nanopb-0.3.9.5-linux-x86.tar.gz -o nanopb-0.3.9.5-linux-x86.tar.gz
+   cd <firmware-root>/<distro-clone-directory>/ADSP.HT.5.9/adsp_proc/
+   python qsh_api/build/config_nanopb_dependency.py -f nanopb-0.3.9.5-linux-x86
+   ```
+- Go to the following directory
+   ```bash
+   cd <firmware-root>/<distro-clone-directory>/ADSP.HT.5.9/adsp_proc/build/ms
+   ```
+- Clean the build
+   ```bash
+   python3 ./build_variant.py hamoa.adsp.prod --clean
+   ```
+- Build the image
+   ```bash
+   python3 ./build_variant.py hamoa.adsp.prod
+   ```
+
+**Build cDSP**
+
+**Tools required**
+
+- Compiler version: Hexagon 8.6.06
+- Python version: Python 3.8.2
+- libffi6 package
+
+**Build steps**
+
+- Check Hexagon DIR
+  ```bash
+  export HEXAGON_ROOT=$HOME/QUalcomm/HEXAGON_Tools
+  echo $HEXAGON_ROOT
+  ```
+- Install the device tree compiler
+   ```bash
+   sudo apt-get install device-tree-compiler
+   export DTC=/usr/bin
+   ```
+- Go to the following directory
+   ```bash
+   cd <firmware-root>/<distro-clone-directory>/CDSP.HT.2.9.c1/cdsp_proc/build/ms
+   ```
+- Clean the build
+   ```bash
+   python3 ./build_variant.py hamoa.cdsp.prod --clean
+   ```
+- Build the image
+   ```bash
+   python3 ./build_variant.py hamoa.cdsp.prod
+   ```
+
+**Build Boot**
+
+**Tools required**
+
+- Compiler version: LLVM version must be updated to 16.0.2
+  ```bash
+  export LLVM=<firmware-root>/llvm/16.0.2/
+  ```
+- Python version: Python 3.10.6
+- libffi6 package
+
+**Build steps**
+
+- Install the device tree compiler
+   ```bash
+   sudo apt-get install device-tree-compiler
+   export DTC=/usr/bin
+   ```
+- Go to the following directory
+   ```bash
+   cd <firmware-root>/<distro-clone-directory>/BOOT.MXF.2.4.2/
+   ```
+- Install the dependencies
+   ```bash
+   python -m pip install -r boot_images/boot_tools/dtschema_tools/oss/requirements.txt
+   pip install json-schema-for-humans
+   ```
+- Clean the build
+   ```bash
+   python3 boot_images/boot_tools/buildex.py -t Hamoa,QcomToolsPkg,QcomTestPkg -r RELEASE -v LE --build_flags=cleanall
+   ```
+- Build the image
+   ```bash
+   python3 boot_images/boot_tools/buildex.py -t Hamoa,QcomToolsPkg,QcomTestPkg -r RELEASE -v LE
+   ```
+
+   <Note>
+   For debug variant builds, replace `RELEASE` with `DEBUG`.
+   </Note>
+
+**Build BOOT_UEFI**
+
+**Tools required**
+
+- Compiler version: LLVM version must be updated to 18.0.1
+  ```bash
+  export LLVM=<firmware-root>/llvm/18.0.1/
+  ```
+- Python version: Python 3.10.6
+- libffi6 package
+
+**Build steps**
+
+- Install the device tree compiler
+   ```bash
+   sudo apt-get install device-tree-compiler
+   export DTC=/usr/bin
+   ```
+- Go to the following directory
+   ```bash
+   cd <firmware-root>/<distro-clone-directory>/BOOT.MXF_UEFI.2.5/
+   ```
+- Install the dependencies
+   ```bash
+   python -m pip install -r boot_images/boot_tools/dtschema_tools/oss/requirements.txt
+   pip install json-schema-for-humans
+   ```
+- Clean the build
+   ```bash
+   python3 boot_images/boot_tools/buildex.py -t Hamoa,QcomToolsPkg,QcomTestPkg -r RELEASE -v LE --build_flags=cleanall
+   ```
+- Build the image
+   ```bash
+   python3 boot_images/boot_tools/buildex.py -t Hamoa,QcomToolsPkg,QcomTestPkg -r RELEASE -v LE
+   ```
+
+   <Note>
+   For debug variant builds, replace `RELEASE` with `DEBUG`.
+   </Note>
+
+**Build Qualcomm TEE firmware**
+
+**Tools required**
+
+- Compiler version: LLVM version must be updated to 18.0.1
+  ```bash
+  export LLVM=<firmware-root>/llvm/18.0.1/
+  ```
+- Python version: Python 3.10
+
+**Build steps**
+
+- Export the `SECTOOLS` variable
+  ```bash
+  export SECTOOLS=<firmware-root>/<distro-clone-directory>/Hamoa_IOT.UBUN.1.0/common/sectoolsv2/ext/Linux/sectools
+  export SECTOOLS_DIR=<firmware-root>/<distro-clone-directory>/Hamoa_IOT.UBUN.1.0/common/sectoolsv2/ext/Linux
+  ```
+- Go to the following directory
+   ```bash
+   cd <firmware-root>/<distro-clone-directory>/TZ.XF.5.0/trustzone_images/build/ms
+   ```
+- Clean the build
+   ```bash
+   python3 build_all.py -b TZ.XF.5.0 CHIPSET=hamoa --clean
+   ```
+- Build the image
+   ```bash
+   python3 build_all.py -b TZ.XF.5.0 CHIPSET=hamoa
+   ```
+
+**Build AOP firmware**
+
+**Tools required**
+
+- Compiler version: LLVM version must be updated to 14.0.0
+  ```bash
+  export LLVM=<firmware-root>/llvm/14.0.0/
+  ```
+- Python version: Python 3.10
+
+**Build steps**
+
+- Export the `SECTOOLS` variable
+  ```bash
+  export SECTOOLS=<firmware-root>/<distro-clone-directory>/Hamoa_IOT.UBUN.1.0/common/sectoolsv2/ext/Linux/sectools
+  export SECTOOLS_DIR=<firmware-root>/<distro-clone-directory>/Hamoa_IOT.UBUN.1.0/common/sectoolsv2/ext/Linux
+  ```
+- Go to the following directory
+  ```bash
+  cd <firmware-root>/<distro-clone-directory>/AOP.HO.5.2/
+  ```
+- Build the image
+  ```bash
+  ./aop_proc/build/build_hamoa.sh
+  ```
+
+**CPUCP firmware**
+
+Qualcomm releases the CPUCP firmware as a binary and you don’t need to compile
+the build.
+
+**BTFM firmware**
+
+Qualcomm releases the BTFM firmware as a binary and you don’t need to compile
+the build.
+
+**WLAN firmware**
+
+Qualcomm releases the WLAN firmware as a binary and you don’t need to compile
+the build.
+
+**Generate firmware prebuilts (boot-critical and split-firmware binaries)**
+
+- Create an integrated firmware binary from the individual components that you
+  compiled
+  ```bash
+  cd <firmware-root>/<distro-clone-directory>/Hamoa_IOT.UBUN.1.0/common/build
+  python build.py --imf
+  ```
+
+- Firmware prebuilt is successful if the following zip files are generated in
+  the `<firmware-root>/<distro-clone-directory>/Hamoa_IOT.UBUN.1.0/common/build/ufs/bin`
+  directory
+  - `HAMOA_bootbinaries.zip`
+  - `HAMOA_fw.zip`
