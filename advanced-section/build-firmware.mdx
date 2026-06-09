@@ -3,22 +3,26 @@ title: "BSP Image Build with firmware"
 ---
 
 import HostRequirements from "../../Yocto-Guide/snippets/host-requirements.mdx"
+import FirmwareHostRequirements from "./snippets/firmware-host-requirements.mdx"
 import InstallQscCli from "../flash/snippets/install-qsc-cli.mdx"
 import HostSetup from "../../Yocto-Guide/snippets/host-setup.mdx"
+import FirmwareHostSetup from "./snippets/firmware-host-setup.mdx"
 
+import ReleaseSupportedChipsets from "./snippets/release-supported-chipsets.mdx"
+import ReleaseTags from "./snippets/release-tags.mdx"
+
+import FirmwareMapping from "./snippets/firmware-mapping.mdx"
+import SyncFirmware from "./snippets/sync-firmware.mdx"
+
+import FirmwareBuild from "./snippets/firmware-build-common.mdx"
 import Firmware6490 from "./snippets/firmware-qcs6490.mdx"
 import Firmware9075 from "./snippets/firmware-iq-9075.mdx"
 import Firmware8275 from "./snippets/firmware-iq-8275.mdx"
 import Firmware615 from "./snippets/firmware-iq-615.mdx"
 
-import FirmwareHostSetup from "./snippets/firmware-host-setup.mdx"
-import SyncFirmware from "./sync-firmware.mdx"
-
 import SyncInstructions from "../../Yocto-Guide/snippets/sync-meta-qcom-extras-release.mdx"
 import BuildInstructions from "../../Yocto-Guide/snippets/build-meta-qcom-extras.mdx"
 import ValidateInstructions from "../../Yocto-Guide/snippets/validate-build-artifacts.mdx"
-
-import { firmware_chipsets, release_tags } from "./release-information.jsx"
 
 ## Introduction
 
@@ -34,31 +38,10 @@ At a high level, this document explains how to
 - Include firmware sources in BSP image build - [Build BSP Image](#build-bsp-image)
 
 ## Supported Chipsets
-The following chipsets are supported by this document. If your chipset is not
-listed, the firmware build process described here does not apply to your device.
-
-<table>
-  <thead>
-    <tr>
-      <th style={{textAlign:"left"}}>Chipset</th>
-      <th style={{textAlign:"left"}}>Description</th>
-      <th style={{textAlign:"left"}}>Supported</th>
-    </tr>
-  </thead>
-  <tbody>
-    {firmware_chipsets.map(({ label, firmware_build_supported, description }) => (
-      <tr key={label}>
-        <td>{label}</td>
-        <td>{description}</td>
-        <td>{firmware_build_supported ? "✓" : "✗"}</td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+<ReleaseSupportedChipsets />
 
 ## Host System Requirements
-- Operating System
-  - Ubuntu 22.04
+<FirmwareHostRequirements />
 <HostRequirements />
 
 ## Install QSC-CLI
@@ -69,29 +52,13 @@ listed, the firmware build process described here does not apply to your device.
 <FirmwareHostSetup />
 
 ## Release Tags
-The following table describes the Qualcomm Yocto layers and release tags
+<ReleaseTags />
 
-<table>
-  <thead>
-    <tr>
-      <th style={{textAlign:"left"}}>Release Tag</th>
-      <th style={{textAlign:"left"}}>Identifier</th>
-    </tr>
-  </thead>
-  <tbody>
-    {release_tags.map(({ label, identifier}) => (
-      <tr key={label}>
-        <td>{label}</td>
-        <td>{identifier}</td>
-      </tr>
-    ))}
-  </tbody>
-</table>
-
-## Sync Firmware Sources
-<SyncFirmware />
+## Firmware Source Mapping
+<FirmwareMapping />
 
 ## Build Firmware
+<FirmwareBuild />
 <Tabs>
   <Tab title="QCM6490/QCS5430">
     <Firmware6490 />

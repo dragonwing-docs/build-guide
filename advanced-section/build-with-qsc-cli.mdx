@@ -4,7 +4,8 @@ title: "BSP Image Build with QSC CLI"
 
 import InstallQscCli from "../flash/snippets/install-qsc-cli.mdx"
 import ValidateInstructions from "../../Yocto-Guide/snippets/validate-build-artifacts.mdx"
-import { firmware_chipsets, qsc_release_parameters } from "./release-information.jsx"
+import ReleaseSupportedChipsets from "./snippets/release-supported-chipsets.mdx"
+import ReleaseQscParameters from "./snippets/release-qsc-parameters.mdx"
 
 ## Introduction
 
@@ -24,64 +25,33 @@ At a high level, this document covers
 The following chipsets are supported by this document. If your chipset is not
 listed, the QSC CLI build process described here does not apply to your device.
 
-<table>
-  <thead>
-    <tr>
-      <th style={{textAlign:"left"}}>Chipset</th>
-      <th style={{textAlign:"left"}}>Description</th>
-      <th style={{textAlign:"left"}}>Supported</th>
-    </tr>
-  </thead>
-  <tbody>
-    {firmware_chipsets.map(({ label, description, qsc_cli_supported }) => (
-      <tr key={label}>
-        <td>{label}</td>
-        <td>{description}</td>
-        <td>{qsc_cli_supported ? "✓" : "✗"}</td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+<ReleaseSupportedChipsets />
 
 ## Install QSC-CLI
 
 <InstallQscCli />
 
+## Configuration Parameters
+
+The following table lists the `--product`, `--release`, and `--image` parameter
+values for the `chip-software download` command. Each product maps to one or
+more firmware images that must be downloaded for a complete build.
+
+<ReleaseQscParameters />
+
 ## Download the software
 
-- Download a software release using `qsc-cli`. The values for the parameters
-  `--product`, `--distribution`, and `--release` are documented
-  in the following table.
+Download a software release using the `chip-software download` command. Use the
+table above to look up the `--product`, `--release`, and `--image` values for
+your chipset:
 
-  ```bash
-  qsc-cli chip-software download --workspace-path '<absolute-workspace-path>' --product '<product-id>' --distribution '<distribution>' --release '<release-id>'
-  ```
-
-<table>
-  <thead>
-    <tr>
-      <th>--product</th>
-      <th>--release</th>
-      <th>--image</th>
-    </tr>
-  </thead>
-  <tbody>
-    {qsc_release_parameters.map(({ product, release, images }) => (
-      <tr key={product}>
-        <td>{product}</td>
-        <td>{release}</td>
-        <td>{images.map((image) => <span key={image}>{image}<br/></span>)}</td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+```bash
+qsc-cli chip-software download --workspace-path '<absolute-workspace-path>' --product '<product-id>' --release '<release-id>'  --image '<image-name>'
+```
 
 ## Build the default configuration
 
 ### Compile
-
-For information on the default configurations, see the table
-_Default values of Machine parameters for QSC CLI_ in the [Release Notes]().
 
 When the download is complete, start the compilation process. Depending on the
 size of the software and the host computer configuration, the compilation
@@ -100,7 +70,7 @@ To recompile individual software images after any modifications to the software
 release, use your existing workspace built using QSC CLI:
 
 ```bash
-qsc-cli chip-software compile --image '<software-image-name>' --workspace-path '<absolute-workspace-path>'
+qsc-cli chip-software compile --image '<image-name>' --workspace-path '<absolute-workspace-path>'
 ```
 
 ## Build your own configuration
