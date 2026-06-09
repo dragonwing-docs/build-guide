@@ -49,10 +49,10 @@
   ```
 
 - Export the `SECTOOLS` variable and compile the firmware builds
-  (`<firmware-root>/<clone-directory>` is the top-level directory)
+  (`<firmware-root>/<distro-clone-directory>` is the top-level directory)
   ```bash
-  export SECTOOLS=<firmware-root>/<clone-directory>/QCS615.LE.2.0/common/sectoolsv2/ext/Linux/sectools
-  export SECTOOLS_DIR=<firmware-root>/<clone-directory>/QCS615.LE.2.0/common/sectoolsv2/ext/Linux
+  export SECTOOLS=<firmware-root>/<distro-clone-directory>/QCS615.LE.2.0/common/sectoolsv2/ext/Linux/sectools
+  export SECTOOLS_DIR=<firmware-root>/<distro-clone-directory>/QCS615.LE.2.0/common/sectoolsv2/ext/Linux
   ```
 
 - Install and set up Hexagon. Set the environment variable `HEXAGON_ROOT`` to the
@@ -76,7 +76,7 @@
 
 - Go to the following directory
    ```bash
-   cd <firmware-root>/<clone-directory>/CDSP.VT.2.2.c4
+   cd <firmware-root>/<distro-clone-directory>/CDSP.VT.2.2.c4
    ```
 
 - Clean the build
@@ -101,15 +101,15 @@
 
 - Nanopb integration (one-time setup)
    ```bash
-   cd <firmware-root>/<clone-directory>/ADSP.VT.5.2.c6/adsp_proc/ssc_api
+   cd <firmware-root>/<distro-clone-directory>/ADSP.VT.5.2.c6/adsp_proc/ssc_api
    curl https://jpa.kapsi.fi/nanopb/download/nanopb-0.3.9.5-linux-x86.tar.gz -o nanopb-0.3.9.5-linux-x86.tar.gz
-   cd <firmware-root>/<clone-directory>/ADSP.VT.5.2.c6/adsp_proc/
+   cd <firmware-root>/<distro-clone-directory>/ADSP.VT.5.2.c6/adsp_proc/
    python ssc_api/build/config_nanopb_dependency.py -f nanopb-0.3.9.5-linux-x86
    ```
 
 - Go to the following directory
    ```bash
-   cd <firmware-root>/<clone-directory>/ADSP.VT.5.2.c6
+   cd <firmware-root>/<distro-clone-directory>/ADSP.VT.5.2.c6
    ```
 - Clean the build
    ```bash
@@ -131,7 +131,7 @@
 
 - Navigate to the following directory
    ```bash
-   cd <firmware-root>/<clone-directory>/AOP.HO.3.6.2/aop_proc/build/
+   cd <firmware-root>/<distro-clone-directory>/AOP.HO.3.6.2/aop_proc/build/
    ```
 
 - Clean the build
@@ -168,7 +168,7 @@
 
 - Go to the following directory
    ```bash
-   cd <firmware-root>/<clone-directory>/BOOT.MXF.1.0.c1/
+   cd <firmware-root>/<distro-clone-directory>/BOOT.MXF.1.0.c1/
    ```
 
 - Install the dependencies
@@ -202,7 +202,7 @@
 
 - Install LLVM
    ```bash
-   cd <firmware-root>/<clone-directory>/TZ.XF.5.29.1/trustzone_images/build/ms/
+   cd <firmware-root>/<distro-clone-directory>/TZ.XF.5.29.1/trustzone_images/build/ms/
    vi build_config_deploy_talos.xml
    # Edit all the occurrences of /pkg/qct/software/llvm/release/arm/16.0.7/ to <firmware-root>/llvm/16.0.7/
    ```
@@ -212,7 +212,7 @@
    ```
 - Build the image
    ```bash
-   cd <firmware-root>/<clone-directory>/TZ.XF.5.29.1/trustzone_images/build/ms/
+   cd <firmware-root>/<distro-clone-directory>/TZ.XF.5.29.1/trustzone_images/build/ms/
    python build_all.py -b TZ.XF.5.0 CHIPSET=talos --cfg=build_config_deploy_talos.xml
    ```
 
@@ -231,12 +231,12 @@ the build.
 - Create an integrated firmware binary from the individual components that
   you compiled
   ```bash
-  cd <firmware-root>/<clone-directory>/QCS615.LE.2.0/common/build
+  cd <firmware-root>/<distro-clone-directory>/QCS615.LE.2.0/common/build
   python build.py --imf
   ```
 
 - Firmware prebuilt is successful if the following zip files are generated in
-  the `<firmware-root>/<clone-directory>/QCS615.LE.2.0/common/build/common/bin`
+  the `<firmware-root>/<distro-clone-directory>/QCS615.LE.2.0/common/build/common/bin`
   directory
   - `QCS615_bootbinaries.zip`
   - `QCS615_dspso.zip`

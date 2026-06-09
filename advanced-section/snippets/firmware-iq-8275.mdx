@@ -36,11 +36,11 @@
   ```
 
 - Export the `SECTOOLS` variable and compile the firmware builds
-  (`<firmware-root>/<clone-directory>` is the
+  (`<firmware-root>/<distro-clone-directory>` is the
   top-level directory)
   ```bash
-  export SECTOOLS=<firmware-root>/<clone-directory>/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux/sectools
-  export SECTOOLS_DIR=<firmware-root>/<clone-directory>/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux
+  export SECTOOLS=<firmware-root>/<distro-clone-directory>/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux/sectools
+  export SECTOOLS_DIR=<firmware-root>/<distro-clone-directory>/QCS8300.LE.2.0/common/sectoolsv2/ext/Linux
   ```
 
 - Install and set up Hexagon. Set the environment variable HEXAGON_ROOT to the
@@ -77,7 +77,7 @@
 
 - Go to the following directory
    ```bash
-   cd <firmware-root>/<clone-directory>/DSP.AT.1.0.1/dsp_proc/build/ms
+   cd <firmware-root>/<distro-clone-directory>/DSP.AT.1.0.1/dsp_proc/build/ms
    ```
 
 - Clean the build
@@ -113,7 +113,7 @@
 
 - Go to the following directory
    ```bash
-   cd <firmware-root>/<clone-directory>/BOOT.MXF.1.0.c1/
+   cd <firmware-root>/<distro-clone-directory>/BOOT.MXF.1.0.c1/
    ```
 
 - Install the dependencies
@@ -147,7 +147,7 @@
 
 - Install LLVM
    ```bash
-   cd <firmware-root>/<clone-directory>/TZ.XF.5.29.1/trustzone_images/build/ms/
+   cd <firmware-root>/<distro-clone-directory>/TZ.XF.5.29.1/trustzone_images/build/ms/
    vi build_config_deploy_monaco.xml
    # Edit all the occurrences of /pkg/qct/software/llvm/release/arm/16.0.7/ to <firmware-root>/llvm/16.0.7/
    ```
@@ -159,7 +159,7 @@
 
 - Build the image
    ```bash
-   cd <firmware-root>/<clone-directory>/TZ.XF.5.29.1/trustzone_images/build/ms/
+   cd <firmware-root>/<distro-clone-directory>/TZ.XF.5.29.1/trustzone_images/build/ms/
    python build_all.py -b TZ.XF.5.0 CHIPSET=monaco --cfg=build_config_deploy_monaco.xml
    ```
 
@@ -174,7 +174,7 @@
 
 - Go to the following directory
    ```bash
-   cd <firmware-root>/<clone-directory>/AOP.HO.3.6.1/aop_proc/build/
+   cd <firmware-root>/<distro-clone-directory>/AOP.HO.3.6.1/aop_proc/build/
    ```
 
 - Clean the build
@@ -212,12 +212,12 @@ the build.
 - Create an integrated firmware binary from the individual components that
   you compiled
   ```bash
-  cd <firmware-root>/<clone-directory>/QCS8300.LE.2.0/common/build
+  cd <firmware-root>/<distro-clone-directory>/QCS8300.LE.2.0/common/build
   python build.py --imf
   ```
 
 - Firmware prebuilt is successful if the following zip files are generated in
-  the `<firmware-root>/<clone-directory>/QCS8300.LE.2.0/common/build/ufs/bin`
+  the `<firmware-root>/<distro-clone-directory>/QCS8300.LE.2.0/common/build/ufs/bin`
   directory
   - `QCS8300_bootbinaries.zip`
   - `QCS8300_dspso.zip`
