@@ -1,0 +1,24 @@
+name: Sync Docs to Dragonwing Docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.md'
+      - '**.mdx'
+      - 'media/**'
+      - 'images/**'
+      - '!.github/**'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    uses: dragonwing-docs/docops-workflows/.github/workflows/sync-to-dragonwing-docs.yml@main
+    with:
+      target_path: "Key-Documents/Build-Guide"
+      repo_name: "build-guide"
+      source_branch: "main"
+      is_landing_page: false
+    secrets:
+      DOCS_SYNC_TOKEN: ${ secrets.DOCS_SYNC_TOKEN }

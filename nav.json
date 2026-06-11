@@ -1,0 +1,18 @@
+{
+  "pages": [
+    "flash/obtain-prebuilts",
+    "flash/flash-with-qdl",
+    "flash/flash-with-pcat",
+    "flash/flash-with-qsc-cli",
+    "flash/how-to-configure-device-drivers",
+    "flash/how-to-configure-ethernet-rj45-port",
+    "flash/how-to-connect-to-wifi",
+    "flash/how-to-sign-in-with-ssh",
+    "flash/how-to-trigger-edl-with-adb",
+    "flash/how-to-trigger-edl-with-uart",
+    "flash/how-to-update-usb-ethernet-controller-firmware",
+    "advanced-section/build-firmware",
+    "advanced-section/build-with-qsc-cli",
+    "advanced-section/how-to-change-hexagon-install-path"
+  ]
+}

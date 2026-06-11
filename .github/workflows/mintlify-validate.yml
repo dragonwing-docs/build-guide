@@ -1,0 +1,9 @@
+name: PR Build Validator
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    uses: dragonwing-docs/docops-workflows/.github/workflows/mintlify-validate.yml@main
