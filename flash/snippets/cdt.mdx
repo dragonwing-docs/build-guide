@@ -33,4 +33,28 @@
       | 7       | Vision Kit (HSP attach)                 |
       | 13      | Industrial Mezz Kit                     |
   </Tab>
+  <Tab title="SPINOR">
+    The Configuration Data Table (CDT) contains device-specific information required
+    for proper platform initialization. You need to download and flash the CDT based
+    on your reference kit.
+
+    - Download the CDT binary from [CodeLinaro](https://artifacts.codelinaro.org/ui/native/codelinaro-le/Qualcomm_Linux/X1E80100/cdt/)
+
+      ```bash
+      curl https://artifacts.codelinaro.org/artifactory/codelinaro-le/Qualcomm_Linux/X1E80100/cdt/IQ-X.1.4-EVK-CDT.tar.gz
+      ```
+
+    - Extract the tarball and navigate into the directory
+
+      ```bash
+      tar -xzf IQ-X.1.4-EVK-CDT.tar.gz
+      cd IQ-X.1.4-EVK-CDT
+      ```
+
+    - Flash the CDT
+
+      ```bash
+      qdl –storage spinor xbl_s_devprg_ns.melf rawprogram0.xml patch0.xml
+      ```
+  </Tab>
 </Tabs>
