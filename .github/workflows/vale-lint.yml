@@ -1,0 +1,16 @@
+name: Lint Prose Style (Vale)
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    uses: dragonwing-docs/docops-workflows/.github/workflows/vale-lint.yml@main
+    secrets:
+      DOCS_SYNC_TOKEN: ${{ secrets.DOCS_SYNC_TOKEN }}
+      DOCS_SYNC_APP_ID: ${{ secrets.DOCS_SYNC_APP_ID }}
+      DOCS_SYNC_APP_PRIVATE_KEY: ${{ secrets.DOCS_SYNC_APP_PRIVATE_KEY }}
