@@ -1,32 +1,60 @@
-The Configuration Data Table (CDT) contains device-specific information required
-for proper platform initialization. You need to select the correct CDT file based
-on your reference kit before flashing.
+<Tabs>
+  <Tab title="UFS/EMMC">
+    The Configuration Data Table (CDT) contains device-specific information required
+    for proper platform initialization. You need to select the correct CDT file based
+    on your reference kit before flashing.
 
-- Multiple CDT binaries are provided as part of the qcomflash tarball.
-  Choose the correct CDT binary for your kit and replace the default `cdt.bin`
-  with the appropriate one.
+    - Multiple CDT binaries are provided as part of the qcomflash tarball.
+      Choose the correct CDT binary for your kit and replace the default `cdt.bin`
+      with the appropriate one.
 
-  ```bash Sample command
-  cp cdt_vision_kit.bin cdt.bin
-  ```
+      ```bash Sample command
+      cp cdt_vision_kit.bin cdt.bin
+      ```
 
-- After the entire flashing process succeeds, you can verify that the correct CDT
-  is loaded by reviewing the UEFI serial logs. Use the *Subtype* field to identify
-  the CDT loaded onto your device.
+    - After the entire flashing process succeeds, you can verify that the correct CDT
+      is loaded by reviewing the UEFI serial logs. Use the *Subtype* field to identify
+      the CDT loaded onto your device.
 
-  ```text Sample output
-  Platform Init [ 1966] BDS
-  Platform : IOT
-  Subtype : 2
-  Boot Device : UFS
-  Chip Name : QCS6490
-  Chip Ver : 1.0
-  ```
+      ```text Sample output
+      Platform Init [ 1966] BDS
+      Platform : IOT
+      Subtype : 2
+      Boot Device : UFS
+      Chip Name : QCS6490
+      Chip Ver : 1.0
+      ```
 
-  | Subtype | Platform Description                    |
-  |---------|-----------------------------------------|
-  | 2       | Vision Kit (Moselle attach)             |
-  | 5       | RB3Gen2 Core Kit (HSP attach)           |
-  | 6       | RB3Gen2 Core Kit (Moselle attach)       |
-  | 7       | Vision Kit (HSP attach)                 |
-  | 13      | Industrial Mezz Kit                     |
+      | Subtype | Platform Description                    |
+      |---------|-----------------------------------------|
+      | 2       | Vision Kit (Moselle attach)             |
+      | 5       | RB3Gen2 Core Kit (HSP attach)           |
+      | 6       | RB3Gen2 Core Kit (Moselle attach)       |
+      | 7       | Vision Kit (HSP attach)                 |
+      | 13      | Industrial Mezz Kit                     |
+  </Tab>
+  <Tab title="SPINOR">
+    The Configuration Data Table (CDT) contains device-specific information required
+    for proper platform initialization. You need to download and flash the CDT based
+    on your reference kit.
+
+    - Download the CDT binary from [CodeLinaro](https://artifacts.codelinaro.org/ui/native/codelinaro-le/Qualcomm_Linux/X1E80100/cdt/)
+
+      ```bash
+      curl https://artifacts.codelinaro.org/artifactory/codelinaro-le/Qualcomm_Linux/X1E80100/cdt/IQ-X.1.4-EVK-CDT.tar.gz
+      ```
+
+    - Extract the tarball and navigate into the directory
+
+      ```bash
+      tar -xzf IQ-X.1.4-EVK-CDT.tar.gz
+      cd IQ-X.1.4-EVK-CDT
+      ```
+
+    - Flash the CDT
+
+      ```bash
+      qdl –storage spinor xbl_s_devprg_ns.melf rawprogram0.xml patch0.xml
+      ```
+  </Tab>
+</Tabs>
