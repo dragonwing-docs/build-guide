@@ -7,7 +7,7 @@ Build with GitHub for unregistered users
 
 Build Qualcomm Linux using the prebuilt proprietary binaries/images.
 
-For more details on the hardware SoCs supported in this build method, see the table *Sync and build methods* in the `Release Notes <https://docs.qualcomm.com/doc/80-70029-300/>`__.
+For more details on the hardware SoCs supported in this build method, see the table *Sync and build methods* in the `Release Notes <https://docs.qualcomm.com/doc/80-70030-300/>`__.
 
 .. _host_machine_req_github_workflow_unregistered_users:
 
