@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - 'release/qli.2.0-docs-r1.0'
       - 'release/**'
     paths:
       - '**.md'
