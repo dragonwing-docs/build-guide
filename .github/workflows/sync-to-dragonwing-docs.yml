@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'release/qli.2.0-docs-r1.0'
     paths:
       - '**.md'
       - '**.mdx'
@@ -18,7 +19,7 @@ jobs:
     with:
       target_path: "Key-Documents/Build-Guide"
       repo_name: "build-guide"
-      source_branch: "main"
+      source_branch: ${{ github.ref_name }}
       is_landing_page: false
     secrets:
       DOCS_SYNC_TOKEN: ${ secrets.DOCS_SYNC_TOKEN }
