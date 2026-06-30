@@ -4,12 +4,14 @@ on:
   push:
     branches:
       - main
-      - 'release/**'
+      - 'release/**'  # Matches any release branch dynamically!
     paths:
       - '**.md'
       - '**.mdx'
+      - '*nav.json'
       - 'media/**'
       - 'images/**'
+      - 'snippets/**'
       - '!.github/**'
   workflow_dispatch:
 
@@ -19,7 +21,9 @@ jobs:
     with:
       target_path: "Key-Documents/Build-Guide"
       repo_name: "build-guide"
-      source_branch: ${{ github.ref_name }}
+      source_branch: "${{ github.ref_name }}"
+      hub_branch: "${{ github.ref_name }}"
       is_landing_page: false
     secrets:
-      DOCS_SYNC_TOKEN: ${ secrets.DOCS_SYNC_TOKEN }
+      DOCS_SYNC_APP_ID: ${{ secrets.DOCS_SYNC_APP_ID }}
+      DOCS_SYNC_APP_PRIVATE_KEY: ${{ secrets.DOCS_SYNC_APP_PRIVATE_KEY }}
